@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>medici.ngo 視覺方向三選一</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { background: #08070A; }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 40px 28px 70px; }
+  h1 { font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: .18em; margin: 0; }
+  .lede { margin: 14px 0 0; max-width: 720px; font-size: 14px; line-height: 1.95; color: var(--muted); }
+  .lede b { color: var(--gold-lit); font-weight: 400; }
+  .hint {
+    margin: 22px 0 0; padding: 14px 16px;
+    border: 1px solid rgba(100,71,29,.5); background: var(--ink-warm);
+    font-size: 12.5px; line-height: 1.9; color: var(--muted); max-width: 720px;
+  }
+  .hint code { font-family: var(--font-mono); color: var(--gold-lit); font-size: 11.5px; }
+
+  .grid { display: flex; gap: 26px; margin-top: 38px; flex-wrap: wrap; }
+  .col { flex: 1 1 390px; min-width: 340px; }
+  .col header { margin-bottom: 14px; }
+  .col h2 { margin: 0; font-family: var(--font-display); font-size: 19px; font-weight: 600; letter-spacing: .1em; }
+  .col .key { font-family: var(--font-mono); font-size: 10px; letter-spacing: .24em; color: var(--gold); }
+  .col p { margin: 9px 0 0; font-size: 12.5px; line-height: 1.85; color: var(--muted); }
+  .col .best { margin-top: 9px; font-size: 12px; color: var(--gold-lit); }
+  .frame {
+    margin-top: 16px; width: 100%; height: 720px;
+    border: 1px solid var(--gold-deep); background: var(--ink);
+  }
+  .frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .open {
+    display: inline-block; margin-top: 12px; padding: 10px 18px;
+    border: 1px solid var(--gold); color: var(--gold-lit);
+    font-family: var(--font-ui); font-size: 12px; letter-spacing: .14em;
+  }
+  footer { margin-top: 54px; padding-top: 26px; border-top: var(--rule); font-size: 12px; line-height: 1.95; color: var(--faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>medici.ngo 視覺方向</h1>
+  <p class="lede">
+    三個方向都是<b>文藝復興暗金 × Netflix 結構</b>，差別在氣質與重心。
+    色票不是我發明的，是從維洛及歐（Verrocchio）與達文西（Leonardo da Vinci）《基督受洗》的實際像素抽出來的；
+    主視覺就是第 1 集劇情裡達文西補畫的那個天使，公共領域，可合法使用。
+    內容全部取自第 1 集定稿檔，不是假字。
+  </p>
+
+  <div class="hint">
+    每個方向都可以點：上方頁籤切換<b>首頁</b>與<b>第 1 集</b>，提示詞的「複製」鈕是真的能複製的。<br>
+    想用手機看：終端機在 <code>_prototypes/</code> 執行 <code>python3 -m http.server 8080</code>，
+    手機連同一個 Wi-Fi 後開 <code>http://電腦IP:8080/</code>。
+  </div>
+
+  <div class="grid">
+    <section class="col">
+      <header>
+        <div class="key">DIRECTION A</div>
+        <h2>金箔畫廊</h2>
+        <p>把每集當成美術館藏品陳列。大量留白，畫作不加濾鏡完整呈現，金只出現在細線與編號。</p>
+        <p class="best">最強：典雅、有份量、不像網紅內容。<br>最弱：追劇的熱度與衝動最低。</p>
+      </header>
+      <div class="frame"><iframe src="A-gallery.html" title="方向 A"></iframe></div>
+      <a class="open" href="A-gallery.html" target="_blank">單獨開啟 A</a>
+    </section>
+
+    <section class="col">
+      <header>
+        <div class="key">DIRECTION B</div>
+        <h2>燭光劇場</h2>
+        <p>Netflix 的追劇體感直接搬過來，但用明暗對照法取代 Netflix 的紅。海報滿版出血，金色只留給行動點。</p>
+        <p class="best">最強：一眼就知道「這是一部劇、可以一集一集追」，轉換最好。<br>最弱：與一般串流站的辨識度差異最小。</p>
+      </header>
+      <div class="frame"><iframe src="B-chiaroscuro.html" title="方向 B"></iframe></div>
+      <a class="open" href="B-chiaroscuro.html" target="_blank">單獨開啟 B</a>
+    </section>
+
+    <section class="col">
+      <header>
+        <div class="key">DIRECTION C</div>
+        <h2>手稿檔案</h2>
+        <p>達文西的鏡像筆記本是全季道具，那就讓網站長得像那本筆記本。每集是一份被歸檔的手稿，提示詞是主角不是附錄。</p>
+        <p class="best">最強：對「全公開配方」這條唯一有搜尋量的 SEO 線最有利，可信度最高。<br>最弱：戲劇感最低，比較像研究網站。</p>
+      </header>
+      <div class="frame"><iframe src="C-codex.html" title="方向 C"></iframe></div>
+      <a class="open" href="C-codex.html" target="_blank">單獨開啟 C</a>
+    </section>
+  </div>
+
+  <footer>
+    三個方向可以混：例如首頁用 B 的追劇熱度，集數頁的劇本與提示詞區用 C 的檔案排版。告訴我要哪個組合就好。<br>
+    圖片來源與授權明細見 <code>assets/ASSET-MANIFEST.json</code>，全部公共領域或 CC0。
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,487 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, LICENSE } from '../lib/site';
+import { getEpisodes, countPrompts } from '../lib/episodes';
+import {
+  detectShotSize,
+  SHOT_SIZE_LABEL,
+  SHOT_SIZE_ORDER,
+  type ShotSize,
+} from '../lib/shot-types';
+import { buildGraph, buildOrganization, buildWebSite, buildFaqPage } from '../lib/seo';
+
+const episodes = await getEpisodes();
+const total = await countPrompts();
+
+type Row = {
+  episode: number;
+  episodeTitle: string;
+  n: number;
+  prompt: string;
+  anchor: string;
+  size: ShotSize;
+};
+
+const rows: Row[] = episodes.flatMap((ep) =>
+  ep.data.shots.map((s) => ({
+    episode: ep.data.episode,
+    episodeTitle: ep.data.title,
+    n: s.n,
+    prompt: s.prompt,
+    anchor: ep.data.anchorPrompt,
+    size: detectShotSize(s.prompt),
+  })),
+);
+
+const counts = SHOT_SIZE_ORDER.map((size) => ({
+  size,
+  label: SHOT_SIZE_LABEL[size],
+  n: rows.filter((r) => r.size === size).length,
+})).filter((c) => c.n > 0);
+
+const faq = [
+  {
+    q: '什麼是角色錨句？為什麼每一鏡都要加？',
+    a: '角色錨句是一段固定描述人物長相、場景與畫面風格的文字，放在每一鏡提示詞的最前面。AI 影片生成工具每次生成都是獨立的，不加錨句的話，同一個角色在 15 個鏡頭裡會長成 15 個人。錨句是接龍能接得起來的技術前提。',
+  },
+  {
+    q: '提示詞為什麼用英文寫？',
+    a: '目前主流的 AI 影片生成工具對英文提示詞的理解仍然比較穩定，而且英文提示詞在不同工具之間的可移植性比較好。劇本本身是中文，只有提示詞用英文。',
+  },
+  {
+    q: '為什麼提示詞裡不寫秒數？',
+    a: '寫秒數會讓生成工具把時間也當成畫面內容去理解，反而讓構圖失焦。節奏交給剪輯處理，提示詞只負責描述這一鏡要看到什麼。',
+  },
+  {
+    q: '這些提示詞可以直接商用嗎？',
+    a: `可以。劇本與提示詞採 ${LICENSE.content.name}，${LICENSE.content.summary}。你拿去開課、做商案、改寫成別的故事都可以，只要標明出處。影片本身的著作權屬各集創作者本人。`,
+  },
+];
+
+const jsonLd = buildGraph([
+  buildOrganization(),
+  buildWebSite(),
+  buildFaqPage(faq.map(({ q, a }) => ({ q, a }))),
+]);
+---
+
+<BaseLayout
+  title="提示詞庫"
+  description={`${SITE.name}全部 ${total} 條 AI 影片生成提示詞完整公開，含角色錨句寫法與分鏡對照。CC BY 4.0，可自由取用改作商用。`}
+  ogImage="/og/prompts.jpg?v=1"
+  ogImageAlt="提示詞庫"
+  jsonLd={jsonLd}
+>
+  <header class="head pad">
+    <p class="kicker">提示詞庫 <span class="bi-en">Prompt library</span></p>
+    <h1>{total} 條提示詞，全部公開</h1>
+    <p class="lede">
+      這裡沒有付費牆，沒有留 email 才給。每一條提示詞都對照得到成品的哪一鏡，
+      複製鈕會自動幫你把角色錨句接在前面。
+    </p>
+  </header>
+
+  <!-- 教學段：這是整頁真正會被搜到的內容 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">01</span>
+      <h2>怎麼寫這種分鏡提示詞</h2>
+    </div>
+    <div class="pad teach">
+      <article>
+        <h3>一、先寫角色錨句，再寫每一鏡</h3>
+        <p>
+          AI 影片生成工具每一次生成都是獨立的，它不記得上一鏡的人長什麼樣子。
+          所以要先把人物長相、年紀、髮型、衣著、場景、光線、畫面比例寫成一段固定文字，
+          每一鏡的提示詞都把它放在最前面。少了這一步，15 個鏡頭會長出 15 個不同的人。
+        </p>
+      </article>
+      <article>
+        <h3>二、一鏡一條，不要把整段劇情塞進一條</h3>
+        <p>
+          一條提示詞只描述一個畫面。把「他被砸了筆、蹲下撿、然後決定畫畫」寫成一條，
+          生成出來會是三個動作混在一起的糊畫面。拆成三鏡，每鏡各一條。
+        </p>
+      </article>
+      <article>
+        <h3>三、寫看得到的東西，不要寫看不到的</h3>
+        <p>
+          「他心裡很不甘」生成不出來，「特寫他的眼睛：沒有情緒」可以。
+          把情緒翻譯成鏡頭語言與可見的動作，這是分鏡提示詞跟一般文字提示詞最大的差別。
+        </p>
+      </article>
+      <article>
+        <h3>四、不要寫秒數</h3>
+        <p>
+          寫秒數會讓工具把時間也當成畫面內容去理解，構圖反而失焦。
+          節奏交給剪輯，提示詞只負責描述這一鏡要看到什麼。
+        </p>
+      </article>
+      <article>
+        <h3>五、直式 9:16 要寫進錨句</h3>
+        <p>
+          短劇是直式的，但多數工具預設橫式。畫面比例要寫在錨句裡，每一鏡才會一致，
+          不然會拿到一半橫一半直的素材。
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 全部提示詞 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">02</span>
+      <h2>全部提示詞</h2>
+      <span class="bi-en">All prompts</span>
+    </div>
+
+    <div class="pad">
+      <p class="filter-note">
+        鏡頭尺寸是直接讀提示詞裡實際出現的英文詞判讀出來的（例如 extreme close-up、camera
+        pulls back），不是人工分類，也不是猜的。判讀不出來的歸在未標註。
+      </p>
+      <div class="chips" role="group" aria-label="依鏡頭尺寸篩選">
+        <button type="button" class="chip is-on" data-filter="all">
+          全部 {rows.length}
+        </button>
+        {
+          counts.map((c) => (
+            <button type="button" class="chip" data-filter={c.size}>
+              {c.label} {c.n}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    {
+      episodes.map((ep) => (
+        <div class="ep-group">
+          <h3 class="ep-group-head pad">
+            <a href={`/ep/${ep.data.episode}`}>
+              第 {ep.data.episode} 集：{ep.data.title}
+            </a>
+          </h3>
+
+          <div class="pad">
+            <div class="specimen specimen--anchor" data-size="anchor">
+              <div class="specimen-bar">
+                <span>ANCHOR · 角色錨句</span>
+                <button
+                  type="button"
+                  class="copy"
+                  data-copy-target={`anchor-${ep.data.episode}`}
+                >
+                  複製
+                </button>
+              </div>
+              {/* pre 內的表達式必須貼齊標籤寫成一行：換行縮排會變成真的空白，
+                  畫面上是首行縮排，複製出來的提示詞也會帶著前後空白 */}
+              <pre class="specimen-body" id={`anchor-${ep.data.episode}`}>{ep.data.anchorPrompt}</pre>
+            </div>
+          </div>
+
+          {rows
+            .filter((r) => r.episode === ep.data.episode)
+            .map((r) => (
+              <div class="pad">
+                <div class="specimen" data-size={r.size}>
+                  <div class="specimen-bar">
+                    <span>
+                      鏡 {String(r.n).padStart(2, '0')} · {SHOT_SIZE_LABEL[r.size]}
+                    </span>
+                    <button
+                      type="button"
+                      class="copy"
+                      data-copy-target={`p-${r.episode}-${r.n}`}
+                      data-anchor-source={`anchor-${r.episode}`}
+                    >
+                      複製
+                    </button>
+                  </div>
+                  <pre class="specimen-body" id={`p-${r.episode}-${r.n}`}>{r.prompt}</pre>
+                </div>
+              </div>
+            ))}
+        </div>
+      ))
+    }
+    <p class="empty pad" data-empty hidden>這個鏡頭尺寸目前沒有提示詞。</p>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">03</span>
+      <h2>常見問題</h2>
+      <span class="bi-en">FAQ</span>
+    </div>
+    <div class="pad">
+      {
+        faq.map((item) => (
+          <div class="faq">
+            <h3>{item.q}</h3>
+            <p>{item.a}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head {
+    padding-top: var(--sp-8);
+  }
+
+  .kicker {
+    margin: 0 0 var(--sp-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--text-accent);
+  }
+
+  .head h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-xl);
+    line-height: 1.4;
+  }
+
+  .lede {
+    margin: var(--sp-4) 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .sec {
+    margin-top: var(--sp-8);
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .sec-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-accent);
+  }
+
+  .sec-head h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.2em;
+  }
+
+  .sec-head .bi-en {
+    margin-left: auto;
+  }
+
+  .teach {
+    padding-top: var(--sp-4);
+  }
+
+  .teach article + article {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .teach h3 {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 400;
+    color: var(--text-accent);
+  }
+
+  .teach p {
+    margin: 0;
+    font-size: var(--fs-base);
+    line-height: 1.95;
+  }
+
+  .filter-note {
+    margin: var(--sp-4) 0 var(--sp-3);
+    font-size: var(--fs-xs);
+    line-height: 1.85;
+    color: var(--text-faint);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  .chip {
+    padding: 6px 11px;
+    background: none;
+    border: 1px solid var(--border-hairline);
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+  }
+
+  .chip.is-on {
+    border-color: var(--border-strong);
+    color: var(--text-accent);
+  }
+
+  .ep-group {
+    margin-top: var(--sp-6);
+  }
+
+  .ep-group-head {
+    margin: 0 0 var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+  }
+
+  .ep-group-head a:hover {
+    color: var(--text-accent);
+  }
+
+  .specimen {
+    margin-bottom: var(--sp-3);
+    border: 1px solid var(--border-hairline);
+    background: var(--bg-warm);
+  }
+
+  .specimen--anchor {
+    border-color: var(--border-default);
+  }
+
+  .specimen-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-hairline);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    color: var(--text-accent);
+  }
+
+  .copy {
+    padding: 3px 9px;
+    background: none;
+    border: 1px solid var(--border-default);
+    color: var(--text-accent);
+    font-family: var(--font-ui);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .copy:hover {
+    background: var(--action-bg);
+    color: var(--action-fg);
+  }
+
+  .specimen-body {
+    margin: 0;
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    line-height: 1.78;
+    color: rgba(233, 225, 210, 0.78);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .empty {
+    margin: var(--sp-5) 0 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+
+  .faq {
+    padding-top: var(--sp-5);
+  }
+
+  .faq + .faq {
+    margin-top: var(--sp-4);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .faq h3 {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 400;
+    color: var(--text-accent);
+  }
+
+  .faq p {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.95;
+    color: var(--text-secondary);
+  }
+</style>
+
+<script>
+  // 複製：一般提示詞自動接上該集的角色錨句，錨句本身則原樣複製
+  document.querySelectorAll<HTMLButtonElement>('.copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const target = document.getElementById(btn.dataset.copyTarget ?? '');
+      if (!target) return;
+
+      const anchorId = btn.dataset.anchorSource;
+      const anchor = anchorId ? document.getElementById(anchorId) : null;
+      const text = anchor
+        ? `${anchor.textContent?.trim()}\n\n${target.textContent?.trim()}`
+        : (target.textContent?.trim() ?? '');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = btn.textContent;
+        btn.textContent = anchor ? '已複製（含錨句）' : '已複製';
+        window.setTimeout(() => {
+          btn.textContent = original;
+        }, 1600);
+      } catch {
+        btn.textContent = '請手動選取';
+      }
+    });
+  });
+
+  // 依鏡頭尺寸篩選。錨句永遠不隱藏，因為任何一條提示詞都需要它
+  const chips = document.querySelectorAll<HTMLButtonElement>('.chip');
+  const specimens = document.querySelectorAll<HTMLElement>('.specimen');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter ?? 'all';
+      chips.forEach((c) => c.classList.toggle('is-on', c === chip));
+
+      let shown = 0;
+      specimens.forEach((el) => {
+        const size = el.dataset.size ?? '';
+        const keep = filter === 'all' || size === 'anchor' || size === filter;
+        el.hidden = !keep;
+        if (keep && size !== 'anchor') shown += 1;
+      });
+
+      // 0 結果才顯示空狀態，不是一開始就掛在那裡
+      if (empty) empty.hidden = shown !== 0;
+    });
+  });
+</script>

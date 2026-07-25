@@ -1,0 +1,73 @@
+---
+import { SITE } from '../../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** OG 圖絕對路徑。換圖內容 MUST 換 URL（加 ?v=N），LINE 才會重抓快取 */
+  ogImage?: string;
+  ogImageAlt?: string;
+  /** 覆寫 canonical。預設由當前路徑組出來 */
+  canonical?: string;
+  /** JSON-LD @graph 字串，由 lib/seo.ts 的 buildGraph 產生 */
+  jsonLd?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og/default.jpg?v=1',
+  ogImageAlt = SITE.name,
+  canonical,
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+
+// canonical 一律用 site 設定組，不用 Astro.url.href（會帶到預覽網域）
+const canonicalURL = canonical ?? new URL(Astro.url.pathname, SITE.url).href;
+const ogImageURL = new URL(ogImage, SITE.url).href;
+const fullTitle = title === SITE.name ? title : `${title}｜${SITE.name}`;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Open Graph。OG 圖一律 JPG，NEVER WebP：LINE 抓不到 WebP -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:locale" content="zh_TW" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageURL} />
+
+<link rel="sitemap" href="/sitemap.xml" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<!--
+  自架字型子集，不打 Google Fonts。
+  第三方字型請求會拖慢 LCP，而 Core Web Vitals 是排名因素，
+  這跟「衝排行榜」的目標直接衝突。
+-->
+<link
+  rel="preload"
+  href="/fonts/noto-serif-tc-subset.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+
+{jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}

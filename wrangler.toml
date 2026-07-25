@@ -1,0 +1,21 @@
+# Cloudflare Pages 設定。
+#
+# 部署方式 = Pages 的 GitHub 整合（不是 wrangler 手動 deploy）。
+# 選 Pages Git 整合的唯一理由：只有它會為同 repo 分支的 PR 自動產生預覽網址，
+# 而共編流程要求發起人在按 Merge 之前看得到畫面。
+# 所以這個檔主要是給本機 `wrangler pages dev` 用的，以及把 D1 綁定寫成程式碼。
+#
+# 本機跑 Functions：
+#   npm run build && npm run dev:api
+# 它會用 .wrangler/state 底下的本機 D1，跟正式資料庫完全隔離。
+
+name = "medici-ngo"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-07-01"
+
+# D1 綁定。database_id 要換成 `npx wrangler d1 create medici-ngo` 產生的那一組，
+# 建好之後填進來並 commit（D1 的 id 不是密鑰，可以進版控）。
+[[d1_databases]]
+binding = "DB"
+database_name = "medici-ngo"
+database_id = "TODO-執行 wrangler d1 create 之後填入"

@@ -1,0 +1,574 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, EXTERNAL } from '../lib/site';
+import {
+  getEpisodes,
+  getLatestEpisode,
+  getOpenSlotNumber,
+  countPrompts,
+  hasVideo,
+} from '../lib/episodes';
+import { buildGraph, buildOrganization, buildWebSite } from '../lib/seo';
+
+const episodes = await getEpisodes();
+const latest = await getLatestEpisode();
+const openSlot = await getOpenSlotNumber();
+const promptCount = await countPrompts();
+
+if (!latest) throw new Error('至少要有一集內容才能建置首頁');
+
+const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
+---
+
+<BaseLayout
+  title={SITE.name}
+  description={SITE.description}
+  ogImage="/og/home.jpg?v=1"
+  ogImageAlt={`${SITE.name}：${SITE.tagline}`}
+  jsonLd={jsonLd}
+>
+  <header class="topbar">
+    <div>
+      <p class="mark">{SITE.name}</p>
+      <p class="bi-en mark-sub">{SITE.publisher} 出品</p>
+    </div>
+    <p class="bi-en">{SITE.nameEn}</p>
+  </header>
+
+  <!-- Hero：最新一集滿版海報 -->
+  <section class="hero" aria-labelledby="hero-title">
+    <Image
+      src={latest.data.poster}
+      alt={`第 ${latest.data.episode} 集主視覺`}
+      widths={[390, 780, 1170]}
+      sizes="(min-width: 900px) 720px, 100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="hero-img"
+    />
+    <div class="hero-body pad">
+      <p class="tag">
+        第 {latest.data.episode} 集
+        {hasVideo(latest) ? '' : ' · 製作中'}
+      </p>
+      <h1 id="hero-title" class="hero-title">{latest.data.title}</h1>
+      <p class="hero-hook">{latest.data.hook}</p>
+
+      <ul class="facets">
+        <li>60 秒內</li>
+        <li>{latest.data.shots.length} 鏡快切</li>
+        {latest.data.formulas.map((f) => <li>{f}</li>)}
+      </ul>
+
+      <div class="actions">
+        <a class="btn-primary" href={`/ep/${latest.data.episode}`}>
+          <span class="tri" aria-hidden="true"></span>
+          看第 {latest.data.episode} 集
+        </a>
+        <a class="btn-ghost" href="/join">我要接棒</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 繼續觀看：純 localStorage，零後端。預設隱藏，有紀錄才由 JS 顯示 -->
+  <a class="resume pad" id="resume" href="/ep/1" hidden>
+    <span class="resume-label">繼續觀看 <b id="resume-title"></b></span>
+    <span class="resume-meta" id="resume-meta"></span>
+    <span class="resume-bar"><i id="resume-fill"></i></span>
+  </a>
+
+  <!-- 劇集列 -->
+  <section class="section" aria-labelledby="season-title">
+    <div class="section-head pad">
+      <h2 id="season-title">第一季　文藝復興</h2>
+      <span class="bi-en">Season 1</span>
+    </div>
+
+    <div class="rail">
+      {
+        episodes.map((ep) => (
+          <a class="card" href={`/ep/${ep.data.episode}`}>
+            <Image
+              src={ep.data.poster}
+              alt=""
+              widths={[132, 264]}
+              sizes="132px"
+              loading="lazy"
+              class="card-img"
+            />
+            <span class="card-veil" aria-hidden="true"></span>
+            <span class="card-no">{ep.data.episode}</span>
+            <span class="card-title">{ep.data.title}</span>
+          </a>
+        ))
+      }
+
+      <!--
+        待接棒的格子刻意留空，不放任何人物肖像。
+        放了肖像等於暗示下一集主角是誰，但下一集內容還沒人決定，
+        而且「觀眾與作者都猜不到下一集」正是這個企劃的核心。
+      -->
+      <a class="slot" href="/join">
+        <span class="slot-plus" aria-hidden="true">＋</span>
+        <span class="slot-no">第 {openSlot} 集</span>
+        <span class="slot-label">開放接棒</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 起源神話 -->
+  <section class="creed pad">
+    <h2>文藝復興不是一家公司做出來的</h2>
+    <p>
+      是一群人互相接棒、互相超越出來的。<br />
+      每位創作者做 60 秒，交出完整劇本與提示詞，讓下一個人接下去。
+    </p>
+    <p class="creed-stat">
+      目前 {episodes.length} 集完成，{promptCount} 條提示詞全部公開，第 {openSlot} 集開放接棒
+    </p>
+    <div class="creed-actions">
+      <a class="btn-ghost" href="/join">看接棒規則</a>
+      <a class="btn-ghost" href="/prompts">逛提示詞庫</a>
+    </div>
+  </section>
+
+  {
+    EXTERNAL.youtubeChannel && (
+      <section class="yt pad">
+        <div>
+          <p class="yt-title">留言與討論都在 YouTube</p>
+          <p class="yt-sub">訂閱頻道，接棒上片不錯過</p>
+        </div>
+        <a class="btn-primary" href={EXTERNAL.youtubeChannel} rel="noopener">
+          前往頻道
+        </a>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--sp-4) var(--gutter);
+  }
+
+  .mark {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    color: var(--text-accent);
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9);
+  }
+
+  .mark-sub {
+    margin: 4px 0 0;
+  }
+
+  /* Hero：雙層漸層 + 暗角，讓文字在任何海報上都讀得到 */
+  .hero {
+    position: relative;
+    min-height: 78svh;
+    overflow: hidden;
+  }
+
+  .hero-img {
+    width: 100%;
+    height: 78svh;
+    min-height: 520px;
+    object-fit: cover;
+    object-position: 50% 22%;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        120% 78% at 50% 30%,
+        transparent 30%,
+        rgba(11, 10, 13, 0.62) 78%,
+        var(--bg-page) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(11, 10, 13, 0.7) 0%,
+        transparent 26%,
+        transparent 46%,
+        rgba(11, 10, 13, 0.93) 88%,
+        var(--bg-page) 100%
+      );
+  }
+
+  .hero-body {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    padding-bottom: var(--sp-6);
+  }
+
+  .tag {
+    display: inline-block;
+    margin: 0 0 var(--sp-4);
+    padding: 5px 11px;
+    border: 1px solid var(--border-strong);
+    background: rgba(11, 10, 13, 0.55);
+    color: var(--text-accent);
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+  }
+
+  .hero-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--fs-2xl);
+    line-height: 1.24;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.85);
+  }
+
+  .hero-hook {
+    margin: var(--sp-4) 0 0;
+    max-width: 32ch;
+    font-size: var(--fs-sm);
+    line-height: 1.8;
+    color: rgba(233, 225, 210, 0.82);
+  }
+
+  .facets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-3);
+    margin: var(--sp-4) 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+  }
+
+  .facets li {
+    position: relative;
+    padding-left: 13px;
+  }
+
+  .facets li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background: var(--action-bg);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+
+  .btn-primary {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 15px 10px;
+    background: var(--action-bg);
+    color: var(--action-fg);
+    font-family: var(--font-ui);
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .btn-primary:hover {
+    background: var(--action-bg-hover);
+  }
+
+  .tri {
+    width: 0;
+    height: 0;
+    border-left: 10px solid var(--action-fg);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+  }
+
+  .btn-ghost {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 10px;
+    border: 1px solid var(--action-ghost-border);
+    background: rgba(233, 225, 210, 0.1);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--border-strong);
+    color: var(--text-accent);
+  }
+
+  /* 繼續觀看 */
+  .resume {
+    display: block;
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-3);
+    padding-bottom: var(--sp-3);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-hairline);
+  }
+
+  .resume-label {
+    display: block;
+    font-size: var(--fs-sm);
+  }
+
+  .resume-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .resume-bar {
+    display: block;
+    margin-top: 7px;
+    height: 2px;
+    background: rgba(233, 225, 210, 0.16);
+  }
+
+  .resume-bar i {
+    display: block;
+    height: 100%;
+    background: var(--action-bg);
+  }
+
+  /* 區塊 */
+  .section {
+    margin-top: var(--sp-7);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-3);
+  }
+
+  .section-head h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  /* 劇集卡 */
+  .card {
+    position: relative;
+    width: 132px;
+    display: block;
+  }
+
+  .card-img {
+    width: 132px;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  .card-veil {
+    position: absolute;
+    inset: auto 0 0;
+    height: 62%;
+    background: linear-gradient(transparent, rgba(11, 10, 13, 0.94));
+  }
+
+  .card-no {
+    position: absolute;
+    left: 8px;
+    bottom: 30px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+  }
+
+  .card-title {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 9px;
+    font-size: var(--fs-xs);
+    line-height: 1.4;
+  }
+
+  .card:hover .card-no,
+  .card:hover .card-title {
+    color: var(--text-accent);
+  }
+
+  /* 待接棒的空格 */
+  .slot {
+    width: 132px;
+    aspect-ratio: 2 / 3;
+    display: grid;
+    place-content: center;
+    gap: 6px;
+    text-align: center;
+    border: 1px dashed rgba(176, 142, 80, 0.5);
+    color: var(--status-open);
+    font-family: var(--font-ui);
+  }
+
+  .slot:hover {
+    border-style: solid;
+    background: rgba(176, 142, 80, 0.08);
+  }
+
+  .slot-plus {
+    font-family: var(--font-display);
+    font-size: 26px;
+  }
+
+  .slot-no {
+    font-size: var(--fs-sm);
+    letter-spacing: 0.1em;
+  }
+
+  .slot-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-secondary);
+  }
+
+  /* 起源神話 */
+  .creed {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-6);
+    padding-bottom: var(--sp-6);
+    text-align: center;
+    background: var(--bg-warm);
+  }
+
+  .creed h2 {
+    margin: 0 0 var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .creed p {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  .creed-stat {
+    margin-top: var(--sp-4) !important;
+    color: var(--text-accent) !important;
+    font-size: var(--fs-xs) !important;
+    letter-spacing: 0.06em;
+  }
+
+  .creed-actions {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+
+  /* YouTube 導流 */
+  .yt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-4);
+    padding-bottom: var(--sp-4);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-hairline);
+  }
+
+  .yt-title {
+    margin: 0;
+    font-size: var(--fs-sm);
+  }
+
+  .yt-sub {
+    margin: 3px 0 0;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .yt .btn-primary {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+  }
+</style>
+
+<script>
+  // 繼續觀看：從 localStorage 讀最後一次的觀看位置。
+  // 這支腳本不送任何資料出去，純粹是本機的追劇體感。
+  interface Progress {
+    ep: number;
+    title: string;
+    sec: number;
+    duration: number;
+  }
+
+  const raw = localStorage.getItem('medici:progress');
+  if (raw) {
+    try {
+      const p = JSON.parse(raw) as Progress;
+      const done = p.duration > 0 && p.sec / p.duration > 0.95;
+      if (p.ep && p.sec > 3 && !done) {
+        const el = document.getElementById('resume') as HTMLAnchorElement | null;
+        const title = document.getElementById('resume-title');
+        const meta = document.getElementById('resume-meta');
+        const fill = document.getElementById('resume-fill');
+        if (el && title && meta && fill) {
+          el.href = `/ep/${p.ep}`;
+          el.hidden = false;
+          title.textContent = `第 ${p.ep} 集`;
+          const mm = String(Math.floor(p.sec / 60)).padStart(2, '0');
+          const ss = String(Math.floor(p.sec % 60)).padStart(2, '0');
+          const left = Math.max(0, Math.round(p.duration - p.sec));
+          meta.textContent = p.duration
+            ? `看到 ${mm}:${ss}，還剩 ${left} 秒`
+            : `看到 ${mm}:${ss}`;
+          fill.style.width = p.duration
+            ? `${Math.min(100, (p.sec / p.duration) * 100)}%`
+            : '0%';
+        }
+      }
+    } catch {
+      localStorage.removeItem('medici:progress');
+    }
+  }
+</script>

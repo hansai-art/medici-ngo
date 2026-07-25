@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方向 B 燭光劇場 · medici.ngo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* 方向 B：燭光劇場
+   假設：把 Netflix 的追劇體感直接搬過來，但用明暗對照法（chiaroscuro）取代 Netflix 的紅。
+   海報滿版出血、底部重漸層、暗角，金色只留給行動點。氣質最戲劇、最像「這是一部劇」。 */
+
+.b-topbar {
+  position: absolute;
+  top: 44px; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px var(--gutter);
+}
+.b-mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.34em;
+  color: var(--gold-lit);
+  text-shadow: 0 2px 18px rgba(0,0,0,0.9);
+}
+.b-topbar .bi-en { color: rgba(233,225,210,0.5); }
+
+/* Hero：滿版海報 + 雙層漸層 + 暗角 */
+.b-hero { position: relative; height: 76vh; min-height: 520px; overflow: hidden; }
+.b-hero img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+.b-hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 78% at 50% 30%, transparent 30%, rgba(11,10,13,0.62) 78%, var(--ink) 100%),
+    linear-gradient(to bottom, rgba(11,10,13,0.7) 0%, transparent 26%, transparent 46%, rgba(11,10,13,0.93) 88%, var(--ink) 100%);
+}
+.b-hero-body {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  padding: 0 var(--gutter) 26px;
+}
+.b-tag {
+  display: inline-block;
+  padding: 5px 11px;
+  border: 1px solid var(--gold);
+  color: var(--gold-lit);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  margin-bottom: 15px;
+  background: rgba(11,10,13,0.55);
+}
+.b-h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.24;
+  letter-spacing: 0.01em;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.85);
+}
+.b-sub {
+  margin: 14px 0 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: rgba(233,225,210,0.82);
+  max-width: 310px;
+}
+.b-dots {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.b-dots span { position: relative; padding-left: 13px; }
+.b-dots span::before {
+  content: ''; position: absolute; left: 0; top: 50%;
+  width: 4px; height: 4px; background: var(--gold); transform: translateY(-50%) rotate(45deg);
+}
+
+.b-actions { display: flex; gap: 10px; margin-top: 22px; }
+.b-play {
+  flex: 2;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 15px 10px;
+  background: var(--gold);
+  color: var(--ink);
+  border: 0;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+.b-play .tri { width: 0; height: 0; border-left: 10px solid var(--ink); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+.b-join {
+  flex: 1;
+  padding: 15px 8px;
+  background: rgba(233,225,210,0.1);
+  border: 1px solid rgba(233,225,210,0.28);
+  color: var(--parchment);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+/* 繼續觀看 */
+.b-resume {
+  margin: 26px var(--gutter) 0;
+  display: flex; gap: 13px; align-items: center;
+  padding: 12px;
+  background: var(--ink-raised);
+  border: 1px solid rgba(100,71,29,0.4);
+}
+.b-resume img { width: 46px; height: 69px; object-fit: cover; flex: 0 0 auto; }
+.b-resume-t { font-size: 13px; }
+.b-resume-s { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.b-bar { margin-top: 7px; height: 2px; background: rgba(233,225,210,0.16); }
+.b-bar i { display: block; height: 100%; width: 38%; background: var(--gold); }
+
+.b-sec { margin-top: 34px; }
+.b-sec-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 0 var(--gutter) 13px;
+}
+.b-sec-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.b-card { width: 132px; position: relative; }
+.b-card img { width: 132px; aspect-ratio: 2/3; object-fit: cover; }
+.b-card-grad { position: absolute; inset: auto 0 0; height: 62%; background: linear-gradient(transparent, rgba(11,10,13,0.94)); pointer-events: none; }
+.b-card-no {
+  position: absolute; left: 8px; bottom: 30px;
+  font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1;
+  color: var(--parchment); text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+}
+.b-card-t { position: absolute; left: 8px; right: 8px; bottom: 9px; font-size: 11px; line-height: 1.4; }
+.b-card--open img { opacity: 0.3; filter: grayscale(0.7); }
+.b-card--open .b-card-no { color: var(--gold); }
+.b-card--open .b-card-t { color: var(--gold-lit); }
+
+.b-slot {
+  width: 132px; aspect-ratio: 2/3;
+  border: 1px dashed rgba(176,142,80,0.5);
+  display: grid; place-content: center; text-align: center; gap: 7px;
+  color: var(--gold-lit);
+  font-family: var(--font-ui); font-size: 12px; letter-spacing: 0.14em;
+}
+.b-slot em { font-style: normal; font-size: 26px; font-family: var(--font-display); }
+
+.b-strip {
+  margin: 34px var(--gutter) 0;
+  padding: 26px 20px;
+  background:
+    linear-gradient(rgba(11,10,13,0.9), rgba(11,10,13,0.95)),
+    url('assets/florence.jpg') center/cover;
+  text-align: center;
+}
+.b-strip h3 { margin: 0 0 10px; font-family: var(--font-display); font-size: 19px; font-weight: 600; }
+.b-strip p { margin: 0; font-size: 12.5px; line-height: 1.85; color: var(--muted); }
+.b-strip button {
+  margin-top: 17px; padding: 12px 26px;
+  background: none; border: 1px solid var(--gold); color: var(--gold-lit);
+  font-family: var(--font-ui); font-size: 12px; letter-spacing: 0.16em; cursor: pointer;
+}
+
+.b-foot { padding: 40px var(--gutter) 56px; text-align: center; }
+.b-foot p { margin: 0 0 6px; font-size: 11px; line-height: 1.9; color: var(--faint); }
+
+/* 集數頁 */
+.b-ep-hero { position: relative; }
+.b-stage {
+  aspect-ratio: 9/16;
+  background:
+    linear-gradient(rgba(11,10,13,0.55), rgba(11,10,13,0.9)),
+    url('assets/poster-ep01.jpg') center/cover;
+  display: grid; place-content: center; gap: 14px; text-align: center;
+  position: relative;
+}
+.b-stage::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(90% 60% at 50% 45%, transparent 25%, rgba(11,10,13,0.8) 100%);
+  pointer-events: none;
+}
+.b-stage-inner { position: relative; z-index: 2; }
+.b-soon {
+  display: inline-block; padding: 8px 16px;
+  border: 1px solid var(--gold); color: var(--gold-lit);
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.28em;
+}
+.b-stage p { margin: 14px auto 0; max-width: 230px; font-size: 12.5px; line-height: 1.85; color: rgba(233,225,210,0.72); }
+
+.b-ep-title { padding: 24px var(--gutter) 0; }
+.b-ep-title h1 { margin: 8px 0 0; font-family: var(--font-display); font-weight: 700; font-size: 25px; line-height: 1.35; }
+
+.b-yt {
+  margin: 22px var(--gutter) 0;
+  padding: 15px 16px;
+  background: var(--ink-raised);
+  border: 1px solid rgba(100,71,29,0.45);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.b-yt-t { font-size: 13px; }
+.b-yt-s { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.b-yt button {
+  flex: 0 0 auto; padding: 9px 14px;
+  background: var(--gold); border: 0; color: var(--ink);
+  font-family: var(--font-ui); font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; cursor: pointer;
+}
+
+.b-blk { padding: 34px var(--gutter) 0; }
+.b-blk h3 {
+  margin: 0 0 3px;
+  font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: 0.14em;
+}
+.b-blk > .bi-en { display: block; margin-bottom: 15px; }
+
+.b-shot { padding: 16px 0; border-bottom: 1px solid rgba(233,225,210,0.09); }
+.b-shot-no {
+  display: inline-block; padding: 2px 8px; margin-bottom: 9px;
+  background: rgba(176,142,80,0.16); color: var(--gold-lit);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em;
+}
+.b-shot p { margin: 0 0 6px; font-size: 14.5px; line-height: 1.95; }
+.b-shot .say { color: var(--gold-lit); }
+.b-pr {
+  /* padding-top 要留給右上角的絕對定位複製鈕，否則會壓到第一行文字 */
+  margin-top: 11px; padding: 34px 13px 12px;
+  background: #000; border: 1px solid rgba(233,225,210,0.12);
+  font-family: var(--font-mono); font-size: 11px; line-height: 1.7; color: rgba(233,225,210,0.62);
+  position: relative;
+}
+.b-cp {
+  position: absolute; top: 8px; right: 8px; padding: 3px 9px;
+  background: rgba(176,142,80,0.2); border: 0; color: var(--gold-lit);
+  font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.12em; cursor: pointer;
+}
+
+.b-poll { margin: 34px var(--gutter) 0; padding: 20px 18px; background: var(--ink-raised); }
+.b-poll h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+.b-poll-s { font-size: 11px; color: var(--muted); margin-bottom: 15px; }
+.b-opt { margin-bottom: 9px; cursor: pointer; }
+.b-opt-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+.b-opt-row span:last-child { color: var(--gold); font-family: var(--font-mono); font-size: 11px; }
+.b-opt-bar { height: 5px; background: rgba(233,225,210,0.1); }
+.b-opt-bar i { display: block; height: 100%; background: var(--gold); }
+
+.b-nav { display: flex; gap: 10px; padding: 36px var(--gutter) 0; }
+.b-nav a {
+  flex: 1; padding: 15px 10px; text-align: center;
+  border: 1px solid rgba(233,225,210,0.22);
+  font-family: var(--font-ui); font-size: 11.5px; letter-spacing: 0.1em; color: var(--muted);
+}
+.b-nav a:last-child { border-color: var(--gold); color: var(--gold-lit); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <nav class="proto-nav" role="tablist">
+    <button role="tab" aria-selected="true" data-target="home">首頁 HOME</button>
+    <button role="tab" aria-selected="false" data-target="ep">第 1 集 EPISODE</button>
+  </nav>
+
+  <!-- ══════════ 首頁 ══════════ -->
+  <main id="home">
+    <div class="b-topbar">
+      <div>
+        <div class="b-mark">動畫接龍</div>
+        <div class="bi-en" style="margin-top:4px">美第奇 AI 學院 出品</div>
+      </div>
+      <div class="bi-en">Animation Relay</div>
+    </div>
+
+    <section class="b-hero">
+      <img src="assets/poster-ep01.jpg" alt="第 1 集主視覺">
+      <div class="b-hero-body">
+        <span class="b-tag">第 1 集 · 製作中</span>
+        <h1 class="b-h1">全工坊都笑我<br>只配洗筆</h1>
+        <p class="b-sub">一個只准洗筆三年的學徒，趁深夜在師父的畫上補了一個天使。隔天早上，全佛羅倫斯都想知道那是誰畫的。</p>
+        <div class="b-dots">
+          <span>60 秒內</span><span>15 鏡快切</span><span>打工人逆襲</span><span>打臉</span>
+        </div>
+        <div class="b-actions">
+          <button class="b-play" data-goto="ep"><i class="tri"></i>看第 1 集</button>
+          <button class="b-join">我要接棒</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="b-resume">
+      <img src="assets/poster-ep01.jpg" alt="">
+      <div style="flex:1">
+        <div class="b-resume-t">繼續觀看 第 1 集</div>
+        <div class="b-resume-s">看到 00:23 · 還剩 37 秒</div>
+        <div class="b-bar"><i></i></div>
+      </div>
+    </div>
+
+    <section class="b-sec">
+      <div class="b-sec-head"><h2>第一季 文藝復興</h2><span class="bi-en">Season 1</span></div>
+      <div class="rail">
+        <a class="b-card" data-goto="ep">
+          <img src="assets/poster-ep01.jpg" alt="第 1 集">
+          <span class="b-card-grad"></span>
+          <span class="b-card-no">1</span>
+          <span class="b-card-t">全工坊都笑我只配洗筆</span>
+        </a>
+        <div class="b-card b-card--open">
+          <img src="assets/poster-ep02.jpg" alt="第 2 集">
+          <span class="b-card-grad"></span>
+          <span class="b-card-no">2</span>
+          <span class="b-card-t">待接棒</span>
+        </div>
+        <div class="b-card b-card--open">
+          <img src="assets/poster-ep03.jpg" alt="第 3 集">
+          <span class="b-card-grad"></span>
+          <span class="b-card-no">3</span>
+          <span class="b-card-t">待接棒</span>
+        </div>
+        <div class="b-slot"><em>＋</em>接下去</div>
+      </div>
+    </section>
+
+    <div class="b-strip">
+      <h3>文藝復興不是一家公司做出來的</h3>
+      <p>是一群人互相接棒、互相超越出來的。<br>每位創作者做 60 秒，交出劇本與提示詞，讓下一個人接下去。</p>
+      <button>看接棒規則</button>
+    </div>
+
+    <footer class="b-foot">
+      <p>目前 1 集完成 · 第 2 集開放接棒</p>
+      <p style="margin-top:16px">劇本與提示詞 CC BY 4.0 · 網站程式碼 MIT</p>
+    </footer>
+  </main>
+
+  <!-- ══════════ 集數頁 ══════════ -->
+  <main id="ep" hidden>
+    <section class="b-ep-hero">
+      <div class="b-stage">
+        <div class="b-stage-inner">
+          <span class="b-soon">本集製作中</span>
+          <p>影片還沒好，但配方先公開。完整劇本與 15 條提示詞都在下面，你現在就能拿去做自己的版本。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="b-ep-title">
+      <span class="b-tag">第 1 集</span>
+      <h1>全工坊都笑我只配洗筆</h1>
+    </div>
+
+    <div class="b-yt">
+      <div style="flex:1">
+        <div class="b-yt-t">留言與討論都在 YouTube</div>
+        <div class="b-yt-s">影片上線後開放，訂閱頻道不錯過接棒</div>
+      </div>
+      <button>前往頻道</button>
+    </div>
+
+    <section class="b-blk">
+      <h3>分鏡劇本與提示詞</h3>
+      <span class="bi-en">Script & prompts · fully open</span>
+
+      <div class="b-shot">
+        <span class="b-shot-no">鏡 01</span>
+        <p>工坊清晨。一捆髒畫筆迎面砸在少年頭上，散落一地。學長居高臨下，眾學徒哄堂大笑。</p>
+        <p class="say">學長：「洗你的筆！畫畫？你也配？」</p>
+        <div class="b-pr"><button class="b-cp">複製</button>A bundle of dirty paintbrushes hurled at the young apprentice's head, brushes scattering across the floor; a sneering senior apprentice looms, others laugh.</div>
+      </div>
+
+      <div class="b-shot">
+        <span class="b-shot-no">鏡 08</span>
+        <p>他抬起手，眾人倒吸一口氣，少年閉眼。「喀。」特寫：他折斷的，是自己的畫筆。</p>
+        <p class="say">師父：「我畫了一輩子，不如這孩子一個晚上。從今天起，我只雕刻。」</p>
+        <div class="b-pr"><button class="b-cp">複製</button>He raises his hand, apprentices flinch, the youth shuts his eyes; close-up: he snaps his own brush in half with both hands.</div>
+      </div>
+
+      <div class="b-shot">
+        <span class="b-shot-no">鏡 14</span>
+        <p>管家向少年深深欠身。少年背起行囊走過學長身邊，停半步，把那支洗了三年的舊筆塞回他手裡，淡淡一笑。</p>
+        <p class="say">少年：「筆，該你洗了。」</p>
+        <div class="b-pr"><button class="b-cp">複製</button>The steward bows deeply to the youth; walking out with his satchel, the youth presses the old washing brush into the senior's hands with a faint smile.</div>
+      </div>
+
+      <p style="font-size:12px;color:var(--faint);text-align:center;padding-top:16px">原型只列 3 鏡，正式站 15 鏡全公開</p>
+    </section>
+
+    <div class="b-poll">
+      <h4>下一棒你最想看什麼？</h4>
+      <div class="b-poll-s">你的選擇會直接影響接棒者的方向</div>
+      <div class="b-opt">
+        <div class="b-opt-row"><span>羅倫佐的委託難到讓天才傻眼</span><span>52%</span></div>
+        <div class="b-opt-bar"><i style="width:52%"></i></div>
+      </div>
+      <div class="b-opt">
+        <div class="b-opt-row"><span>那個學長的復仇</span><span>29%</span></div>
+        <div class="b-opt-bar"><i style="width:29%"></i></div>
+      </div>
+      <div class="b-opt">
+        <div class="b-opt-row"><span>畫裡的天使又動了</span><span>19%</span></div>
+        <div class="b-opt-bar"><i style="width:19%"></i></div>
+      </div>
+    </div>
+
+    <section class="b-blk">
+      <h3>接點卡</h3>
+      <span class="bi-en">Handoff card</span>
+      <div class="b-shot" style="border:0;padding-top:0">
+        <p style="font-size:13.5px">必守 1：達文西已進美第奇宮，師父自此封筆改做雕刻。</p>
+        <p style="font-size:13.5px">必守 2：委託內容由下一棒決定，但必須難到讓天才當場瞳孔地震。</p>
+        <p style="font-size:13.5px">必守 3：鏡像筆記本是全季道具；他畫的天使活了。</p>
+        <p class="say" style="font-size:13.5px;margin-top:12px">懸念：委託到底是什麼？</p>
+      </div>
+    </section>
+
+    <div class="b-nav">
+      <a href="#">← 回首頁</a>
+      <a href="#">接下這一棒 →</a>
+    </div>
+
+    <footer class="b-foot">
+      <p>劇本與提示詞 CC BY 4.0 · 影片著作權屬創作者本人</p>
+      <p>主視覺：維洛及歐與達文西《基督受洗》局部，公共領域</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  document.querySelectorAll('.proto-nav button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var t = btn.dataset.target;
+      document.querySelectorAll('.proto-nav button').forEach(function (b) {
+        b.setAttribute('aria-selected', String(b === btn));
+      });
+      document.getElementById('home').hidden = t !== 'home';
+      document.getElementById('ep').hidden = t !== 'ep';
+      window.scrollTo(0, 0);
+    });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      document.querySelector('.proto-nav button[data-target="ep"]').click();
+    });
+  });
+  document.querySelectorAll('.b-cp').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.parentElement.textContent.replace('複製', '').trim();
+      navigator.clipboard && navigator.clipboard.writeText(t);
+      b.textContent = '已複製';
+      setTimeout(function () { b.textContent = '複製'; }, 1400);
+    });
+  });
+</script>
+</body>
+</html>

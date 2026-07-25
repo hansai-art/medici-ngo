@@ -1,0 +1,374 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+/**
+ * 內部儀表板。
+ *
+ * 為什麼是靜態外殼 + 前端取數：主站是 static output，build 時不可能知道即時數字。
+ * 資料來自 /api/stats（Pages Function + D1）。
+ *
+ * ⚠️ 這一頁目前只有 robots.txt 擋爬蟲，那不是存取控制。
+ * 上線前 MUST 在 Cloudflare 用 Access 保護 /internal/*，步驟見 docs/OPERATIONS.md。
+ *
+ * 這一頁刻意不掛 Analytics（BaseLayout 會依路徑自動排除 /internal），
+ * 不然我們自己看數據會污染數據。
+ */
+---
+
+<BaseLayout
+  title="內部儀表板"
+  description="動畫接龍的觀看與投票數據"
+  noindex={true}
+>
+  <header class="head pad">
+    <p class="kicker">內部 <span class="bi-en">Internal</span></p>
+    <h1>觀看數據</h1>
+    <p class="lede" data-generated>載入中</p>
+  </header>
+
+  <section class="pad">
+    <div class="cards" data-summary>
+      <p class="hint">載入中</p>
+    </div>
+  </section>
+
+  <section class="pad">
+    <h2 class="h">續看曲線 <span class="bi-en">Retention</span></h2>
+    <p class="hint">
+      橫軸是影片秒數，縱軸是還在看的 session 數。心跳每 3 秒回報一次，
+      所以中間有空隙是正常的，那是沒取樣到的秒數，不是沒人看。
+      陡降的那一秒就是要修的地方：第 1 集是 15 鏡快切，
+      如果一直掉在同一個位置，代表是那一鏡的節奏有問題，不是整支片的問題。
+    </p>
+    <div data-curves><p class="hint">載入中</p></div>
+  </section>
+
+  <section class="pad">
+    <h2 class="h">離開點 <span class="bi-en">Exit points</span></h2>
+    <p class="hint">
+      關掉頁面那一瞬間停在第幾秒。這是 sendBeacon 補送的那一發，
+      GA4 內建的影片事件抓不到。
+    </p>
+    <div data-exits><p class="hint">載入中</p></div>
+  </section>
+
+  <section class="pad">
+    <h2 class="h">投票 <span class="bi-en">Votes</span></h2>
+    <div data-votes><p class="hint">載入中</p></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head {
+    padding-top: var(--sp-8);
+  }
+
+  .kicker {
+    margin: 0 0 var(--sp-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--text-accent);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-lg);
+  }
+
+  .lede {
+    margin: var(--sp-3) 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+  }
+
+  section {
+    margin-top: var(--sp-7);
+  }
+
+  .h {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin: 0 0 var(--sp-2);
+    padding-bottom: var(--sp-2);
+    border-bottom: 1px solid var(--border-default);
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 400;
+  }
+
+  .h .bi-en {
+    margin-left: auto;
+  }
+
+  .hint {
+    margin: 0 0 var(--sp-3);
+    font-size: var(--fs-xs);
+    line-height: 1.85;
+    color: var(--text-faint);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--sp-3);
+  }
+</style>
+
+<style is:global>
+  /* 下面這些節點由前端產生，所以要 global：scoped style 加不到動態節點上 */
+  .stat {
+    padding: var(--sp-4);
+    border: 1px solid var(--border-hairline);
+  }
+
+  .stat-k {
+    margin: 0 0 6px;
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+  }
+
+  .stat-v {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    color: var(--text-accent);
+  }
+
+  .stat-sub {
+    margin: 4px 0 0;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .curve {
+    margin-bottom: var(--sp-5);
+  }
+
+  .curve-title {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.12em;
+    color: var(--text-secondary);
+  }
+
+  /* 用 CSS grid 畫長條，不引圖表函式庫：
+     一個只有幾十根長條的圖，拉一整包 JS 進來不划算，也會拖慢頁面。 */
+  .bars {
+    display: grid;
+    align-items: end;
+    height: 7rem;
+    padding: var(--sp-2);
+    background: var(--bg-raised);
+  }
+
+  .bar {
+    min-width: 2px;
+    background: var(--chart-fill);
+  }
+
+  .bar--dim {
+    background: var(--chart-fill-dim);
+  }
+
+  .axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-faint);
+  }
+
+  .tally {
+    margin-bottom: var(--sp-4);
+  }
+
+  .tally-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border-hairline);
+    font-size: var(--fs-sm);
+  }
+
+  .tally-n {
+    font-family: var(--font-mono);
+    color: var(--text-accent);
+  }
+</style>
+
+<script>
+  interface Summary {
+    ep: number;
+    sessions: number;
+    completion: number;
+    avgSec: number;
+    duration: number;
+  }
+  interface Point {
+    ep: number;
+    sec: number;
+    viewers?: number;
+    exits?: number;
+  }
+  interface VoteRow {
+    poll: string;
+    option: string;
+    count: number;
+  }
+
+  const $ = (sel: string) => document.querySelector<HTMLElement>(sel);
+
+  /** 全部走 textContent 與 createElement，NEVER innerHTML：
+      這一頁顯示的是使用者送上來的字串（投票選項），拼 HTML 等於開一個 XSS 洞。 */
+  const el = (tag: string, cls?: string, text?: string): HTMLElement => {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+
+  /**
+   * 長條圖。橫軸是真的秒數，不是「第幾筆資料」：
+   * 心跳每 3 秒一次，資料本來就是稀疏的，把每一筆並排會讓
+   * 第 3 秒與第 60 秒看起來一樣寬，圖就在說謊。
+   * 每根長條落在它真正的那一秒，中間的空隙就是沒取樣到的秒數。
+   */
+  const bars = (points: Point[], key: 'viewers' | 'exits', duration: number): HTMLElement => {
+    const wrap = el('div');
+    const max = Math.max(...points.map((p) => p[key] ?? 0), 1);
+    const span = Math.max(duration, points.at(-1)?.sec ?? 0, 1);
+
+    const chart = el('div', 'bars');
+    chart.style.gridTemplateColumns = `repeat(${span + 1}, 1fr)`;
+
+    points.forEach((p) => {
+      const bar = el('div', key === 'exits' ? 'bar bar--dim' : 'bar');
+      bar.style.height = `${Math.round(((p[key] ?? 0) / max) * 100)}%`;
+      bar.style.gridColumnStart = String(p.sec + 1);
+      bar.title = `第 ${p.sec} 秒：${p[key] ?? 0}`;
+      chart.appendChild(bar);
+    });
+
+    const axis = el('div', 'axis');
+    axis.appendChild(el('span', undefined, '0 秒'));
+    axis.appendChild(el('span', undefined, `最高 ${max}`));
+    axis.appendChild(el('span', undefined, `${span} 秒`));
+
+    wrap.appendChild(chart);
+    wrap.appendChild(axis);
+    return wrap;
+  };
+
+  const groupByEpisode = (rows: Point[]): Map<number, Point[]> => {
+    const map = new Map<number, Point[]>();
+    rows.forEach((r) => {
+      const list = map.get(r.ep) ?? [];
+      list.push(r);
+      map.set(r.ep, list);
+    });
+    return map;
+  };
+
+  const render = (data: {
+    generatedAt: string;
+    summary: Summary[];
+    curve: Point[];
+    exits: Point[];
+    votes: VoteRow[];
+  }) => {
+    const gen = $('[data-generated]');
+    if (gen) gen.textContent = `資料時間 ${new Date(data.generatedAt).toLocaleString('zh-TW')}`;
+
+    // 摘要卡
+    const cards = $('[data-summary]');
+    if (cards) {
+      cards.textContent = '';
+      if (!data.summary.length) {
+        cards.appendChild(el('p', 'hint', '還沒有觀看資料。影片上線之後這裡才會有數字。'));
+      }
+      data.summary.forEach((s) => {
+        const card = el('div', 'stat');
+        card.appendChild(el('p', 'stat-k', `第 ${s.ep} 集`));
+        card.appendChild(el('p', 'stat-v', String(s.sessions)));
+        card.appendChild(
+          el(
+            'p',
+            'stat-sub',
+            `平均看 ${Math.round(s.avgSec)} 秒${s.duration ? ` / 共 ${s.duration} 秒` : ''}，看完 ${Math.round(s.completion * 100)}%`,
+          ),
+        );
+        cards.appendChild(card);
+      });
+    }
+
+    // 續看曲線與離開點
+    const durations = new Map(data.summary.map((s) => [s.ep, s.duration]));
+
+    const paintCurves = (host: HTMLElement | null, rows: Point[], key: 'viewers' | 'exits') => {
+      if (!host) return;
+      host.textContent = '';
+      const grouped = groupByEpisode(rows);
+      if (!grouped.size) {
+        host.appendChild(el('p', 'hint', '還沒有資料'));
+        return;
+      }
+      grouped.forEach((points, ep) => {
+        const box = el('div', 'curve');
+        box.appendChild(el('p', 'curve-title', `第 ${ep} 集`));
+        box.appendChild(bars(points, key, durations.get(ep) ?? 0));
+        host.appendChild(box);
+      });
+    };
+
+    paintCurves($('[data-curves]'), data.curve, 'viewers');
+    paintCurves($('[data-exits]'), data.exits, 'exits');
+
+    // 投票
+    const votes = $('[data-votes]');
+    if (votes) {
+      votes.textContent = '';
+      if (!data.votes.length) {
+        votes.appendChild(el('p', 'hint', '還沒有人投票'));
+      }
+      const polls = new Map<string, VoteRow[]>();
+      data.votes.forEach((v) => {
+        const list = polls.get(v.poll) ?? [];
+        list.push(v);
+        polls.set(v.poll, list);
+      });
+      polls.forEach((rows, poll) => {
+        const box = el('div', 'tally');
+        box.appendChild(el('p', 'curve-title', poll));
+        rows.forEach((r) => {
+          const row = el('div', 'tally-row');
+          row.appendChild(el('span', undefined, r.option));
+          row.appendChild(el('span', 'tally-n', String(r.count)));
+          box.appendChild(row);
+        });
+        votes.appendChild(box);
+      });
+    }
+  };
+
+  void fetch('/api/stats')
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(render)
+    .catch((err: unknown) => {
+      const gen = $('[data-generated]');
+      // 儀表板抓不到資料就要講清楚，NEVER 顯示空狀態讓人以為「沒有人看」
+      if (gen) gen.textContent = `讀不到資料：${String(err)}。本機要跑 npm run dev:api 才有 D1。`;
+    });
+</script>

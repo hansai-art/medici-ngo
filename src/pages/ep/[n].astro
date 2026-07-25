@@ -1,0 +1,936 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EpisodePlayer from '../../components/EpisodePlayer.astro';
+import { SITE, EXTERNAL, LICENSE } from '../../lib/site';
+import { getEpisodes, getNeighbours, getOpenSlotNumber } from '../../lib/episodes';
+import {
+  buildGraph,
+  buildOrganization,
+  buildWebSite,
+  buildCreativeWork,
+  buildVideoObject,
+  buildBreadcrumb,
+} from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const episodes = await getEpisodes();
+  return episodes.map((ep) => ({
+    params: { n: String(ep.data.episode) },
+    props: { ep },
+  }));
+}) satisfies GetStaticPaths;
+
+const { ep } = Astro.props;
+const d = ep.data;
+
+const { prev, next } = await getNeighbours(d.episode);
+const openSlot = await getOpenSlotNumber();
+
+const canonical = new URL(`/ep/${d.episode}`, SITE.url).href;
+const jsonLd = buildGraph([
+  buildOrganization(),
+  buildWebSite(),
+  buildCreativeWork(ep, canonical),
+  buildVideoObject(ep, canonical),
+  buildBreadcrumb([
+    { name: SITE.name, url: SITE.url },
+    { name: `第 ${d.episode} 集：${d.title}`, url: canonical },
+  ]),
+]);
+
+const levelClass: Record<string, string> = {
+  史實: 'lv-fact',
+  軼事等級: 'lv-anecdote',
+  戲劇虛構: 'lv-fiction',
+  本劇設定: 'lv-canon',
+};
+---
+
+<BaseLayout
+  title={`第 ${d.episode} 集：${d.title}`}
+  description={d.hook}
+  ogImage={`/og/ep-${d.episode}.jpg?v=1`}
+  ogImageAlt={`第 ${d.episode} 集：${d.title}`}
+  canonical={canonical}
+  jsonLd={jsonLd}
+>
+  <header class="file-head pad">
+    <div>
+      <p class="file-mark">{SITE.name}</p>
+      <p class="file-mirror">{SITE.publisher}</p>
+    </div>
+    <p class="file-code">
+      EP {String(d.episode).padStart(2, '0')}<br />{d.shots.length} SHOTS
+    </p>
+  </header>
+
+  <div class="pad">
+    <EpisodePlayer
+      episode={d.episode}
+      title={d.title}
+      videoId={d.youtube.videoId}
+      poster={d.poster}
+    />
+  </div>
+
+  <div class="pad title-block">
+    <p class="stamp">
+      第 {d.episode} 集{d.youtube.videoId ? '' : ' · 製作中'}
+    </p>
+    <h1>{d.title}</h1>
+    <p class="hook">{d.hook}</p>
+  </div>
+
+  <!-- 著錄欄：這一集的規格 -->
+  <dl class="spec pad">
+    <div><dt>時長</dt><dd>{d.youtube.durationSec ? `${d.youtube.durationSec} 秒` : '60 秒內'}</dd></div>
+    <div><dt>鏡數</dt><dd>{d.shots.length} 鏡快切</dd></div>
+    <div><dt>公式</dt><dd>{d.formulas.join('　')}</dd></div>
+    <div><dt>創作者</dt><dd>{d.creator.name}</dd></div>
+    <div>
+      <dt>使用工具</dt>
+      <dd>
+        {
+          d.tools.length
+            ? d.tools.map((t) => `${t.name} ${t.version}`).join('　')
+            : '待創作者自填'
+        }
+      </dd>
+    </div>
+    <div>
+      <dt>公開內容</dt>
+      <dd class="hi">劇本全文　{d.shots.length} 條提示詞　接點卡　史實註</dd>
+    </div>
+  </dl>
+
+  {
+    EXTERNAL.youtubeChannel && (
+      <a class="yt-bar pad" href={EXTERNAL.youtubeChannel} rel="noopener">
+        <span>
+          <b>留言與討論都在 YouTube</b>
+          <em>訂閱頻道，接棒上片不錯過</em>
+        </span>
+        <span class="yt-go">前往頻道</span>
+      </a>
+    )
+  }
+
+  <!-- 分鏡與提示詞：本站唯一真的有搜尋量的內容，用完整標題結構讓它被搜到 -->
+  <section class="sec" id="prompts">
+    <div class="sec-head pad">
+      <span class="sec-no">01</span>
+      <h2>分鏡劇本與提示詞</h2>
+      <span class="bi-en">Script &amp; prompts</span>
+    </div>
+
+    <div class="pad anchor-note">
+      <p>
+        以下每一鏡的提示詞都要在最前面加上同一段<strong>角色錨句</strong>，
+        15 鏡的人物長相才會一致。這是接龍能接得起來的技術前提。
+      </p>
+      <div class="specimen">
+        <div class="specimen-bar">
+          <span>ANCHOR · 角色錨句</span>
+          <button type="button" class="copy" data-copy-target="anchor">複製</button>
+        </div>
+        <pre class="specimen-body" id="anchor">{d.anchorPrompt}</pre>
+      </div>
+    </div>
+
+    {
+      d.shots.map((shot) => (
+        <article class="shot">
+          <div class="pad">
+            <div class="shot-head">
+              <h3 class="shot-no">鏡 {String(shot.n).padStart(2, '0')}</h3>
+              {shot.beat && <span class="shot-beat">{shot.beat}</span>}
+            </div>
+            {shot.script.split('\n').map((line) => (
+              <p class={line.includes('：「') || line.startsWith('旁白') ? 'say' : 'line'}>
+                {line}
+              </p>
+            ))}
+          </div>
+          <div class="pad">
+            <div class="specimen">
+              <div class="specimen-bar">
+                <span>PROMPT {String(shot.n).padStart(2, '0')}</span>
+                <button
+                  type="button"
+                  class="copy"
+                  data-copy-target={`p${shot.n}`}
+                  data-with-anchor="true"
+                >
+                  複製
+                </button>
+              </div>
+              <pre class="specimen-body" id={`p${shot.n}`}>{shot.prompt}</pre>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </section>
+
+  {/* 站內互動：直接產生創作決策用的偏好資料。選項由每集自己定義，見 content.config.ts */}
+  {
+    d.poll && (
+      <section class="poll pad" data-poll={`ep-${d.episode}-next`}>
+        <h2>{d.poll.question}</h2>
+        <p class="poll-sub">你的選擇會直接給接棒者看到</p>
+        <div class="poll-options">
+          {d.poll.options.map((opt) => (
+            <button type="button" class="poll-opt" data-option={opt.key} aria-pressed="false">
+              <span class="poll-row">
+                <span class="poll-label">{opt.label}</span>
+                <span class="poll-count" data-count />
+              </span>
+              <span class="poll-bar">
+                <i />
+              </span>
+            </button>
+          ))}
+        </div>
+        <p class="poll-state" data-poll-state>選一個，投完才看得到大家的答案</p>
+      </section>
+    )
+  }
+
+  <!-- 史實註 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">02</span>
+      <h2>史實註</h2>
+      <span class="bi-en">Historical notes</span>
+    </div>
+    <div class="pad">
+      {
+        d.historyNotes.map((h) => (
+          <div class="note">
+            <div class="note-head">
+              <span class={`note-lv ${levelClass[h.level] ?? ''}`}>{h.level}</span>
+              <h3>{h.claim}</h3>
+            </div>
+            <p>
+              {h.note}
+              {h.url && (
+                <>
+                  {' '}
+                  <a href={h.url} rel="noopener nofollow">
+                    來源
+                  </a>
+                </>
+              )}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- 接點卡 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">03</span>
+      <h2>接點卡</h2>
+      <span class="bi-en">Handoff card</span>
+    </div>
+    <dl class="spec pad">
+      {
+        d.handoffCard.musts.map((m, i) => (
+          <div>
+            <dt>必守 {i + 1}</dt>
+            <dd>{m}</dd>
+          </div>
+        ))
+      }
+      <div>
+        <dt>懸念</dt>
+        <dd class="hi">{d.handoffCard.cliffhanger}</dd>
+      </div>
+    </dl>
+
+    <div class="creator pad">
+      <div class="avatar" aria-hidden="true">頭像<br />待補</div>
+      <div>
+        <p class="creator-name">{d.creator.name}</p>
+        <p class="creator-bio">{d.creator.bio}</p>
+        {
+          d.creator.links.length > 0 && (
+            <p class="creator-links">
+              {d.creator.links.map((l) => (
+                <a href={l.url} rel="noopener">
+                  {l.label}
+                </a>
+              ))}
+            </p>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="cta pad">
+      <a class="cta-primary" href="/join">我要接第 {openSlot} 棒</a>
+      <a class="cta-ghost" href={`/ep/${d.episode}.md`}>取用純文字版</a>
+    </div>
+  </section>
+
+  <nav class="pager pad" aria-label="集數導覽">
+    {prev ? <a href={`/ep/${prev.data.episode}`}>← 第 {prev.data.episode} 集</a> : <a href="/">← 回首頁</a>}
+    {
+      next ? (
+        <a class="pager-next" href={`/ep/${next.data.episode}`}>
+          第 {next.data.episode} 集 →
+        </a>
+      ) : (
+        <a class="pager-next" href="/join">
+          接下這一棒 →
+        </a>
+      )
+    }
+  </nav>
+
+  <p class="credit pad">
+    主視覺：{d.posterCredit}<br />
+    本集劇本與提示詞採 {LICENSE.content.name}，{LICENSE.content.summary}。{LICENSE.video}。
+  </p>
+</BaseLayout>
+
+<style>
+  /* 手稿紙的橫線。極淡，只提供質感不干擾閱讀 */
+  :global(body) {
+    background-image: linear-gradient(rgba(176, 142, 80, 0.045) 1px, transparent 1px);
+    background-size: 100% 30px;
+    background-position: 0 -1px;
+  }
+
+  .file-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: var(--sp-6);
+    padding-bottom: var(--sp-5);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .file-mark {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 17px;
+    letter-spacing: 0.3em;
+  }
+
+  /* 鏡像字，呼應達文西的鏡像筆記本（本季道具）。
+     transform-origin 不能設 left，否則整段字會翻到自身左側跑出畫面。 */
+  .file-mirror {
+    display: inline-block;
+    margin: 5px 0 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.2em;
+    color: var(--border-default);
+    transform: scaleX(-1);
+  }
+
+  .file-code {
+    margin: 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--text-accent);
+  }
+
+  .title-block {
+    padding-top: var(--sp-5);
+  }
+
+  .stamp {
+    display: inline-block;
+    margin: 0 0 var(--sp-3);
+    padding: 3px 8px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-accent);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+  }
+
+  .title-block h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-xl);
+    line-height: 1.42;
+  }
+
+  .hook {
+    margin: var(--sp-3) 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  /* 著錄欄 */
+  .spec {
+    margin: var(--sp-6) 0 0;
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .spec div {
+    display: flex;
+    gap: var(--sp-4);
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-hairline);
+    font-size: var(--fs-sm);
+  }
+
+  .spec dt {
+    flex: 0 0 5.5rem;
+    padding-top: 2px;
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+  }
+
+  .spec dd {
+    flex: 1;
+    margin: 0;
+    line-height: 1.75;
+  }
+
+  .spec .hi {
+    color: var(--text-accent);
+  }
+
+  /* YouTube 導流條 */
+  .yt-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-4);
+    padding-bottom: var(--sp-4);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-hairline);
+  }
+
+  .yt-bar b {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 400;
+  }
+
+  .yt-bar em {
+    display: block;
+    margin-top: 3px;
+    font-style: normal;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .yt-go {
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    background: var(--action-bg);
+    color: var(--action-fg);
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  /* 章節 */
+  .sec {
+    margin-top: var(--sp-8);
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .sec-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-accent);
+  }
+
+  .sec-head h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.2em;
+  }
+
+  .sec-head .bi-en {
+    margin-left: auto;
+  }
+
+  .anchor-note {
+    padding-top: var(--sp-4);
+  }
+
+  .anchor-note p {
+    margin: 0 0 var(--sp-3);
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .anchor-note strong {
+    color: var(--text-primary);
+    font-weight: 400;
+  }
+
+  /* 分鏡 */
+  .shot {
+    padding-top: var(--sp-5);
+  }
+
+  .shot + .shot {
+    margin-top: var(--sp-5);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .shot-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+  }
+
+  .shot-no {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--text-accent);
+  }
+
+  .shot-beat {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+  }
+
+  .shot p {
+    margin: 9px 0 0;
+    font-size: var(--fs-base);
+    line-height: 1.95;
+  }
+
+  .shot .say {
+    color: var(--text-accent);
+  }
+
+  /* 提示詞標本 */
+  .specimen {
+    margin-top: var(--sp-3);
+    border: 1px solid var(--border-hairline);
+    background: var(--bg-warm);
+  }
+
+  .specimen-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-hairline);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    color: var(--text-accent);
+  }
+
+  .copy {
+    padding: 3px 9px;
+    background: none;
+    border: 1px solid var(--border-default);
+    color: var(--text-accent);
+    font-family: var(--font-ui);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .copy:hover {
+    background: var(--action-bg);
+    color: var(--action-fg);
+  }
+
+  .specimen-body {
+    margin: 0;
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    line-height: 1.78;
+    color: rgba(233, 225, 210, 0.78);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* 投票 */
+  .poll {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    padding-bottom: var(--sp-5);
+    background: var(--bg-raised);
+  }
+
+  .poll h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 600;
+  }
+
+  .poll-sub {
+    margin: 4px 0 var(--sp-4);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .poll-opt {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--sp-2);
+    padding: 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    color: inherit;
+  }
+
+  .poll-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin-bottom: 5px;
+  }
+
+  .poll-label {
+    font-size: var(--fs-sm);
+  }
+
+  .poll-count {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+  }
+
+  .poll-bar {
+    display: block;
+    height: 5px;
+    background: var(--chart-track);
+  }
+
+  .poll-bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--chart-fill);
+    transition: width 0.4s ease;
+  }
+
+  /* 還沒投票前不預告數字，避免第一個看到的人被既有結果帶風向 */
+  .poll:not([data-voted]) .poll-count,
+  .poll:not([data-voted]) .poll-bar i {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .poll-bar i {
+      transition: none;
+    }
+  }
+
+  .poll-opt[aria-pressed='true'] .poll-label {
+    color: var(--text-accent);
+  }
+
+  .poll-state {
+    margin: var(--sp-3) 0 0;
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+  }
+
+  /* 史實註 */
+  .note {
+    padding-top: var(--sp-4);
+  }
+
+  .note-head {
+    display: flex;
+    gap: 9px;
+    align-items: baseline;
+  }
+
+  .note-head h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  .note-lv {
+    flex: 0 0 auto;
+    padding: 2px 7px;
+    border: 1px solid var(--border-default);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--text-accent);
+  }
+
+  .note-lv.lv-fiction {
+    border-color: var(--status-fiction);
+    color: var(--status-fiction);
+  }
+
+  .note p {
+    margin: 7px 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  .note a {
+    color: var(--text-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* 創作者 */
+  .creator {
+    display: flex;
+    gap: var(--sp-4);
+    align-items: center;
+    margin-top: var(--sp-5);
+  }
+
+  .avatar {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-content: center;
+    border: 1px solid var(--border-default);
+    background: var(--bg-warm);
+    font-family: var(--font-ui);
+    font-size: 9px;
+    text-align: center;
+    color: var(--text-faint);
+  }
+
+  .creator-name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+  }
+
+  .creator-bio {
+    margin: 3px 0 0;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+  }
+
+  .creator-links {
+    margin: 5px 0 0;
+    display: flex;
+    gap: var(--sp-3);
+    font-size: var(--fs-xs);
+  }
+
+  .creator-links a {
+    color: var(--text-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* CTA */
+  .cta {
+    display: flex;
+    gap: var(--sp-2);
+    margin-top: var(--sp-5);
+  }
+
+  .cta-primary,
+  .cta-ghost {
+    flex: 1;
+    padding: 13px 6px;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+  }
+
+  .cta-primary {
+    background: var(--action-bg);
+    color: var(--action-fg);
+    font-weight: 600;
+  }
+
+  .cta-ghost {
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+
+  /* 上下集 */
+  .pager {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-8);
+  }
+
+  .pager a {
+    flex: 1;
+    padding: 15px 10px;
+    text-align: center;
+    border: 1px solid var(--border-subtle);
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+  }
+
+  .pager-next {
+    border-color: var(--border-strong) !important;
+    color: var(--text-accent) !important;
+  }
+
+  .credit {
+    margin-top: var(--sp-6);
+    font-size: var(--fs-xs);
+    line-height: 1.85;
+    color: var(--text-faint);
+  }
+</style>
+
+<script>
+  import { sessionId } from '../../lib/session-id';
+
+  // 複製提示詞。帶 data-with-anchor 的會自動把角色錨句接在前面，
+  // 因為使用者直接貼進生成工具時，少了錨句人物長相就會跑掉。
+  const anchorEl = document.getElementById('anchor');
+
+  document.querySelectorAll<HTMLButtonElement>('.copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const target = document.getElementById(btn.dataset.copyTarget ?? '');
+      if (!target) return;
+
+      const withAnchor = btn.dataset.withAnchor === 'true' && anchorEl;
+      const text = withAnchor
+        ? `${anchorEl.textContent?.trim()}\n\n${target.textContent?.trim()}`
+        : (target.textContent?.trim() ?? '');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = btn.textContent;
+        btn.textContent = withAnchor ? '已複製（含錨句）' : '已複製';
+        window.setTimeout(() => {
+          btn.textContent = original;
+        }, 1600);
+      } catch {
+        btn.textContent = '請手動選取';
+      }
+    });
+  });
+
+  // ── 投票 ────────────────────────────────────────────────
+  // 投完才顯示結果：先看到別人的答案會帶風向，拿到的資料就不是真的偏好了。
+  const pollEl = document.querySelector<HTMLElement>('[data-poll]');
+
+  if (pollEl) {
+    const poll = pollEl.dataset.poll ?? '';
+    const stateEl = pollEl.querySelector<HTMLElement>('[data-poll-state]');
+    const opts = [...pollEl.querySelectorAll<HTMLButtonElement>('.poll-opt')];
+    const VOTED_KEY = `medici:voted:${poll}`;
+
+    const paint = (tally: Array<{ option: string; count: number }>) => {
+      const counts = new Map(tally.map((t) => [t.option, t.count]));
+      const total = tally.reduce((sum, t) => sum + t.count, 0);
+
+      opts.forEach((btn) => {
+        const n = counts.get(btn.dataset.option ?? '') ?? 0;
+        const pct = total > 0 ? Math.round((n / total) * 100) : 0;
+        const bar = btn.querySelector<HTMLElement>('.poll-bar i');
+        const count = btn.querySelector<HTMLElement>('[data-count]');
+        if (bar) bar.style.width = `${pct}%`;
+        if (count) count.textContent = `${pct}%`;
+      });
+
+      if (stateEl) {
+        stateEl.textContent =
+          total > 0 ? `目前 ${total} 票，結果會交給接棒者` : '還沒有人投票，你是第一個';
+      }
+    };
+
+    const markVoted = (option: string | null) => {
+      pollEl.dataset.voted = 'true';
+      opts.forEach((btn) =>
+        btn.setAttribute('aria-pressed', String(btn.dataset.option === option)),
+      );
+    };
+
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/vote?poll=${encodeURIComponent(poll)}`);
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as { tally: Array<{ option: string; count: number }> };
+        paint(data.tally);
+      } catch {
+        if (stateEl) stateEl.textContent = '投票結果暫時看不到，選了還是會記錄';
+      }
+    };
+
+    // 這一輪已經投過就直接顯示結果，不用再點一次
+    const previous = (() => {
+      try {
+        return localStorage.getItem(VOTED_KEY);
+      } catch {
+        return null;
+      }
+    })();
+
+    if (previous) {
+      markVoted(previous);
+      void load();
+    }
+
+    opts.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const option = btn.dataset.option ?? '';
+        markVoted(option);
+        try {
+          localStorage.setItem(VOTED_KEY, option);
+        } catch {
+          /* 無痕模式寫不進去，不影響投票本身 */
+        }
+
+        if (stateEl) stateEl.textContent = '送出中';
+
+        try {
+          const res = await fetch('/api/vote', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ poll, option, sid: sessionId() }),
+          });
+          if (!res.ok) throw new Error(String(res.status));
+          const data = (await res.json()) as { tally: Array<{ option: string; count: number }> };
+          paint(data.tally);
+        } catch {
+          if (stateEl) stateEl.textContent = '這一票沒送出去，等一下再試一次';
+        }
+      });
+    });
+  }
+</script>

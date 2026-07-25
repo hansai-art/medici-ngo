@@ -1,0 +1,65 @@
+[
+  {
+    "file": "lorenzo.jpg",
+    "purpose": "羅倫佐·德·美第奇",
+    "commons": "File:Lorenzo de Medici.jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Lorenzo_de_Medici.jpg",
+    "license": "Public domain",
+    "artist": "<bdi>Workshop of <a href=\"https://en.wikipedia.org/wiki/en:Bronzino\" class=\"extiw\" title=\"w:en:Bronzino\"><span title=\"Italian Mannerist painter (1503-1572)\">Bronzino</span></a></bdi>",
+    "bytes": 280403
+  },
+  {
+    "file": "michelangelo.jpg",
+    "purpose": "米開朗基羅（第一季後續集數）",
+    "commons": "File:Miguel Ángel, por Daniele da Volterra (detalle).jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Miguel_%C3%81ngel,_por_Daniele_da_Volterra_(detalle).jpg",
+    "license": "Public domain",
+    "artist": "<bdi>Attributed to <a href=\"https://en.wikipedia.org/wiki/en:Daniele_da_Volterra\" class=\"extiw\" title=\"w:en:Daniele da Volterra\"><span title=\"Italian painter (1509-1566)\">Daniele da Volterra</span></a",
+    "bytes": 1293465
+  },
+  {
+    "file": "raphael.jpg",
+    "purpose": "拉斐爾（第一季後續集數）",
+    "commons": "File:Raffaello Sanzio.jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Raffaello_Sanzio.jpg",
+    "license": "Public domain",
+    "artist": "<bdi><a href=\"https://en.wikipedia.org/wiki/en:Raphael\" class=\"extiw\" title=\"w:en:Raphael\"><span title=\"Italian painter and architect (1483–1520)\">Raphael</span></a></bdi>",
+    "bytes": 489163
+  },
+  {
+    "file": "botticelli.jpg",
+    "purpose": "波提切利（第一季後續集數）",
+    "commons": "File:Sandro Botticelli 083.jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Sandro_Botticelli_083.jpg",
+    "license": "Public domain",
+    "artist": "<bdi><a href=\"https://en.wikipedia.org/wiki/en:Sandro_Botticelli\" class=\"extiw\" title=\"w:en:Sandro Botticelli\"><span title=\"Italian painter (1445–1510)\">Sandro Botticelli</span></a></bdi>",
+    "bytes": 767144
+  },
+  {
+    "file": "baptism-full.jpg",
+    "purpose": "EP.1 核心：維洛及歐與達文西《基督受洗》（左側天使為達文西所繪）",
+    "commons": "File:Verrocchio, Leonardo da Vinci - Battesimo di Cristo - Google Art Project.jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Verrocchio,_Leonardo_da_Vinci_-_Battesimo_di_Cristo_-_Google_Art_Project.jpg",
+    "license": "Public domain",
+    "artist": "<bdi><a href=\"https://en.wikipedia.org/wiki/en:Andrea_del_Verrocchio\" class=\"extiw\" title=\"w:en:Andrea del Verrocchio\"><span title=\"15th century Italian sculptor, goldsmith and painter (c.1435-1488)\">",
+    "bytes": 4919457
+  },
+  {
+    "file": "leonardo-portrait.jpg",
+    "purpose": "達文西肖像（弟子梅爾齊繪）",
+    "commons": "File:A portrait of Leonardo, by Francesco Melzi.jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:A_portrait_of_Leonardo,_by_Francesco_Melzi.jpg",
+    "license": "Public domain",
+    "artist": "<bdi>Attributed to <a href=\"https://en.wikipedia.org/wiki/en:Francesco_Melzi\" class=\"extiw\" title=\"w:en:Francesco Melzi\"><span title=\"Italian painter (1490-1570)\">Francesco Melzi</span></a></bdi>",
+    "bytes": 1524313
+  },
+  {
+    "file": "florence.jpg",
+    "purpose": "佛羅倫斯主教座堂圓頂（背景氛圍）",
+    "commons": "File:Duomo Brunelleschi Florence terrace Uffizi.jpg",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Duomo_Brunelleschi_Florence_terrace_Uffizi.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Jebulon\" title=\"User:Jebulon\">Jebulon</a>",
+    "bytes": 660304
+  }
+]

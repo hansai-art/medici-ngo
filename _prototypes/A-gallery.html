@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方向 A 金箔畫廊 · medici.ngo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* 方向 A：金箔畫廊
+   假設：把每一集當成美術館的一件藏品來陳列。大量負空間，畫作不加濾鏡完整呈現，
+   金只出現在細線與編號。氣質偏典雅克制，讓「文藝復興」的份量自己說話。 */
+
+.a-head { padding: 34px var(--gutter) 26px; text-align: center; }
+.a-mark {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 21px;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  color: var(--parchment);
+}
+.a-mark-en {
+  margin-top: 9px;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: var(--gold);
+}
+.a-hair { width: 40px; height: 1px; background: var(--gold-deep); margin: 20px auto 0; }
+
+.a-plate { padding: 4px var(--gutter) 0; }
+.a-plate img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border: 1px solid var(--gold-deep);
+}
+.a-caption { padding: 18px 4px 0; text-align: center; }
+.a-no {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+}
+.a-title {
+  margin: 12px 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+}
+.a-meta {
+  margin-top: 14px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.a-source {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--faint);
+}
+
+.a-cta { display: flex; gap: 10px; padding: 26px var(--gutter) 0; }
+.a-btn {
+  flex: 1;
+  padding: 13px 8px;
+  text-align: center;
+  border: 1px solid var(--gold-deep);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--parchment);
+  background: none;
+  cursor: pointer;
+}
+.a-btn--solid { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+
+.a-section { padding: 44px 0 0; }
+.a-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 var(--gutter) 16px;
+}
+.a-section-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.24em;
+  color: var(--parchment);
+}
+
+.a-card { width: 116px; }
+.a-card img {
+  width: 116px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border: 1px solid rgba(100, 71, 29, 0.55);
+  filter: grayscale(0.15);
+}
+.a-card figcaption {
+  margin-top: 9px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.a-card b {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  font-weight: 400;
+}
+.a-card--open img { filter: none; opacity: 0.28; }
+.a-card--open { position: relative; }
+.a-open-label {
+  position: absolute;
+  inset: 0 0 auto;
+  top: 42%;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold-lit);
+}
+
+.a-status {
+  margin: 44px var(--gutter) 0;
+  padding: 22px 20px;
+  border-top: var(--rule);
+  border-bottom: var(--rule);
+  text-align: center;
+}
+.a-status-num {
+  font-family: var(--font-display);
+  font-size: 34px;
+  color: var(--gold-lit);
+  line-height: 1;
+}
+.a-status-label { margin-top: 10px; font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+
+.a-foot { padding: 40px var(--gutter) 56px; text-align: center; }
+.a-foot p { font-size: 11px; line-height: 1.9; color: var(--faint); margin: 0 0 6px; }
+
+/* 集數頁 */
+.a-player {
+  margin: 0 var(--gutter);
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--gold-deep);
+  background:
+    linear-gradient(rgba(11,10,13,0.72), rgba(11,10,13,0.86)),
+    url('assets/poster-ep01.jpg') center/cover;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 12px;
+}
+.a-player-badge {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--gold-lit);
+  border: 1px solid var(--gold-deep);
+  padding: 7px 14px;
+}
+.a-player-note { font-size: 12px; color: var(--muted); max-width: 220px; margin: 0 auto; line-height: 1.8; }
+
+.a-block { padding: 34px var(--gutter) 0; }
+.a-block h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.24em;
+  color: var(--gold);
+}
+.a-block > .bi-en { display: block; margin-bottom: 16px; }
+
+.a-shot { padding: 18px 0; border-top: 1px solid rgba(100,71,29,0.35); }
+.a-shot:first-of-type { border-top: 0; }
+.a-shot-no { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.24em; color: var(--gold); }
+.a-shot p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.95; }
+.a-shot .line { color: var(--parchment); }
+.a-shot .say { color: var(--gold-lit); }
+
+.a-prompt {
+  margin-top: 12px;
+  /* padding-top 要留給右上角的絕對定位複製鈕，否則會壓到第一行文字 */
+  padding: 34px 13px 12px;
+  background: var(--ink-warm);
+  border: 1px solid rgba(100,71,29,0.4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--muted);
+  position: relative;
+}
+.a-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  background: var(--ink);
+  border: 1px solid var(--gold-deep);
+  color: var(--gold);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.a-list { margin: 0; padding: 0; list-style: none; }
+.a-list li {
+  padding: 11px 0 11px 26px;
+  font-size: 13.5px;
+  line-height: 1.8;
+  border-bottom: 1px solid rgba(100,71,29,0.28);
+  position: relative;
+}
+.a-list li::before {
+  content: attr(data-n);
+  position: absolute;
+  left: 0;
+  top: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.a-creator { display: flex; gap: 14px; align-items: center; margin-top: 16px; }
+.a-creator-av {
+  width: 54px; height: 54px;
+  border: 1px solid var(--gold-deep);
+  background: var(--ink-warm);
+  display: grid; place-content: center;
+  font-family: var(--font-ui); font-size: 9px; color: var(--faint); text-align: center;
+  flex: 0 0 auto;
+}
+.a-creator-name { font-family: var(--font-display); font-size: 16px; }
+.a-creator-bio { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+.a-nextprev { display: flex; gap: 10px; padding: 40px var(--gutter) 0; }
+.a-nextprev a {
+  flex: 1;
+  padding: 15px 10px;
+  border: 1px solid var(--gold-deep);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.a-nextprev a:last-child { text-align: right; color: var(--gold-lit); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <nav class="proto-nav" role="tablist">
+    <button role="tab" aria-selected="true" data-target="home">首頁 HOME</button>
+    <button role="tab" aria-selected="false" data-target="ep">第 1 集 EPISODE</button>
+  </nav>
+
+  <!-- ══════════ 首頁 ══════════ -->
+  <main id="home">
+    <header class="a-head">
+      <div class="a-mark">動畫接龍</div>
+      <div class="a-mark-en">美第奇 AI 學院 出品 · Animation Relay</div>
+      <div class="a-hair"></div>
+    </header>
+
+    <figure class="a-plate" style="margin:0">
+      <img src="assets/poster-ep01.jpg" alt="第 1 集主視覺：達文西在《基督受洗》左側所繪的天使">
+      <figcaption class="a-caption">
+        <div class="a-no">EPISODE 01 · 製作中</div>
+        <h1 class="a-title">全工坊都笑我<br>只配洗筆</h1>
+        <div class="a-meta">15 鏡 · 60 秒內 · 打工人逆襲 × 打臉</div>
+        <p class="a-source">主視覺：維洛及歐（Verrocchio）與達文西（Leonardo da Vinci）《基督受洗》局部，烏菲茲美術館藏，公共領域</p>
+      </figcaption>
+    </figure>
+
+    <div class="a-cta">
+      <button class="a-btn a-btn--solid" data-goto="ep">閱讀劇本與提示詞</button>
+      <button class="a-btn">我要接棒</button>
+    </div>
+
+    <section class="a-section">
+      <div class="a-section-head">
+        <div class="a-section-title">第一季 文藝復興</div>
+        <div class="bi-en">Season One</div>
+      </div>
+      <div class="rail">
+        <figure class="a-card" style="margin:0">
+          <img src="assets/poster-ep01.jpg" alt="第 1 集">
+          <figcaption><b>EP 01</b>全工坊都笑我只配洗筆</figcaption>
+        </figure>
+        <figure class="a-card a-card--open" style="margin:0">
+          <img src="assets/poster-ep02.jpg" alt="第 2 集待接棒">
+          <span class="a-open-label">待接棒</span>
+          <figcaption><b>EP 02</b>羅倫佐的第一個委託</figcaption>
+        </figure>
+        <figure class="a-card a-card--open" style="margin:0">
+          <img src="assets/poster-ep03.jpg" alt="第 3 集待接棒">
+          <span class="a-open-label">待接棒</span>
+          <figcaption><b>EP 03</b>尚未命名</figcaption>
+        </figure>
+        <figure class="a-card a-card--open" style="margin:0">
+          <img src="assets/poster-ep04.jpg" alt="第 4 集待接棒">
+          <span class="a-open-label">待接棒</span>
+          <figcaption><b>EP 04</b>尚未命名</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <div class="a-status">
+      <div class="a-status-num">1</div>
+      <div class="a-status-label">集已完成 · 下一棒開放中</div>
+    </div>
+
+    <footer class="a-foot">
+      <p>每集 60 秒內。劇本與提示詞全部公開。</p>
+      <p>觀眾與作者都猜不到下一集。</p>
+      <p style="margin-top:18px">劇本與提示詞 CC BY 4.0 · 網站程式碼 MIT</p>
+    </footer>
+  </main>
+
+  <!-- ══════════ 集數頁 ══════════ -->
+  <main id="ep" hidden>
+    <div class="a-block" style="padding-bottom:20px">
+      <div class="a-no" style="font-family:var(--font-mono);font-size:11px;letter-spacing:.3em;color:var(--gold)">EPISODE 01</div>
+      <h1 class="a-title" style="text-align:left;font-size:24px">全工坊都笑我只配洗筆</h1>
+    </div>
+
+    <div class="a-player">
+      <div class="a-player-badge">本集製作中</div>
+      <p class="a-player-note">影片還沒好，但配方先公開：完整劇本與 15 條提示詞都在下面</p>
+    </div>
+
+    <section class="a-block">
+      <h3>分鏡劇本</h3>
+      <span class="bi-en">Shot-by-shot script</span>
+
+      <div class="a-shot">
+        <div class="a-shot-no">鏡 01</div>
+        <p class="line">工坊清晨。一捆髒畫筆迎面砸在少年頭上，散落一地。學長居高臨下，眾學徒哄堂大笑。</p>
+        <p class="say">學長：「洗你的筆！畫畫？你也配？」</p>
+        <div class="a-prompt">
+          <button class="a-copy">複製</button>
+          A bundle of dirty paintbrushes hurled at the young apprentice's head, brushes scattering across the floor; a sneering senior apprentice looms, others laugh.
+        </div>
+      </div>
+
+      <div class="a-shot">
+        <div class="a-shot-no">鏡 02</div>
+        <p class="line">少年不說話，蹲下身，一支一支把筆撿起來。特寫他的眼睛：沒有情緒。</p>
+        <p class="say">旁白：「佛羅倫斯最大的工坊裡，有個學徒，三年只准洗筆。」</p>
+        <div class="a-prompt">
+          <button class="a-copy">複製</button>
+          The youth kneels and gathers the brushes one by one; extreme close-up of his calm, emotionless eyes.
+        </div>
+      </div>
+
+      <div class="a-shot">
+        <div class="a-shot-no">鏡 05</div>
+        <p class="line">最後一筆。大特寫：天使的睫毛，輕輕顫了一下。少年湊近，對天使比了一個「噓」。</p>
+        <p class="say">旁白：「那一晚，他決定補上師父畫裡缺的天使。」</p>
+        <div class="a-prompt">
+          <button class="a-copy">複製</button>
+          Final stroke; macro close-up: the painted angel's eyelashes flutter once; the youth leans in and raises a finger to his lips: shh.
+        </div>
+      </div>
+
+      <p style="font-size:12px;color:var(--faint);text-align:center;padding-top:18px">原型只列 3 鏡，正式站 15 鏡全公開</p>
+    </section>
+
+    <section class="a-block">
+      <h3>接點卡</h3>
+      <span class="bi-en">Handoff card for the next creator</span>
+      <ul class="a-list">
+        <li data-n="01">達文西已進美第奇宮，身份是剛出道的天才新人；師父自此封筆改做雕刻。</li>
+        <li data-n="02">羊皮紙上「羅倫佐的第一個委託」內容由下一棒決定，但必須難到讓天才當場瞳孔地震。</li>
+        <li data-n="03">鏡像筆記本是全季道具。世界觀規則已亮相：他畫的天使活了。</li>
+        <li data-n="？" style="color:var(--gold-lit)">懸念：委託到底是什麼？</li>
+      </ul>
+    </section>
+
+    <section class="a-block">
+      <h3>史實註</h3>
+      <span class="bi-en">Historical notes</span>
+      <ul class="a-list">
+        <li data-n="•">天使軼事出自瓦薩里（Vasari）《藝苑名人傳》，屬軼事等級，藝術史普遍轉述但細節存疑。達文西 1460 年代末在維洛及歐工坊當學徒為史實。</li>
+        <li data-n="•">鏡像書寫是史實，動機有防偷學與左撇子避暈墨兩說並存，台詞採前者。</li>
+        <li data-n="•">美第奇管家召募與十倍薪水為戲劇虛構。</li>
+      </ul>
+    </section>
+
+    <section class="a-block">
+      <h3>本集創作者</h3>
+      <span class="bi-en">Creator</span>
+      <div class="a-creator">
+        <div class="a-creator-av">頭像<br>待補</div>
+        <div>
+          <div class="a-creator-name">Hans Lin</div>
+          <div class="a-creator-bio">一句話自介待創作者提供</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="a-nextprev">
+      <a href="#">← 回首頁</a>
+      <a href="#">下一集 待接棒 →</a>
+    </div>
+
+    <footer class="a-foot">
+      <p>本集劇本與提示詞採 CC BY 4.0，署名即可自由使用</p>
+      <p>影片著作權屬創作者本人</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  document.querySelectorAll('.proto-nav button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.dataset.target;
+      document.querySelectorAll('.proto-nav button').forEach(function (b) {
+        b.setAttribute('aria-selected', String(b === btn));
+      });
+      document.getElementById('home').hidden = target !== 'home';
+      document.getElementById('ep').hidden = target !== 'ep';
+      window.scrollTo(0, 0);
+    });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      document.querySelector('.proto-nav button[data-target="ep"]').click();
+    });
+  });
+  document.querySelectorAll('.a-copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.parentElement.textContent.replace('複製', '').trim();
+      navigator.clipboard && navigator.clipboard.writeText(t);
+      b.textContent = '已複製';
+      setTimeout(function () { b.textContent = '複製'; }, 1400);
+    });
+  });
+</script>
+</body>
+</html>

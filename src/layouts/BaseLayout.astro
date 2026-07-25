@@ -1,0 +1,117 @@
+---
+import BaseHead from '../components/seo/BaseHead.astro';
+import Analytics from '../components/seo/Analytics.astro';
+import { SITE, LICENSE } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  canonical?: string;
+  jsonLd?: string;
+  noindex?: boolean;
+}
+
+const { title, description, ogImage, ogImageAlt, canonical, jsonLd, noindex } =
+  Astro.props;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
+      canonical={canonical}
+      jsonLd={jsonLd}
+      noindex={noindex}
+    />
+    <Analytics />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要內容</a>
+
+    <div class="shell">
+      <main id="main">
+        <slot />
+      </main>
+
+      <footer class="site-foot pad">
+        <nav aria-label="頁尾導覽" class="foot-nav">
+          <a href="/">首頁 <span class="bi-en">Home</span></a>
+          <a href="/join">我要接棒 <span class="bi-en">Join</span></a>
+          <a href="/prompts">提示詞庫 <span class="bi-en">Prompts</span></a>
+          <a href="/fork">自己開一條 <span class="bi-en">Fork</span></a>
+        </nav>
+
+        <p class="foot-line">{SITE.name}　{SITE.publisher} 出品</p>
+        <p class="foot-fine">
+          劇本與提示詞採 <a href={LICENSE.content.url} rel="license">{LICENSE.content.name}</a>，
+          {LICENSE.content.summary}。{LICENSE.video}。
+        </p>
+        <p class="foot-fine">
+          網站程式碼採 <a href={LICENSE.code.url} rel="license">{LICENSE.code.name}</a>。
+          圖片來源與授權見 <a href="/credits/ASSET-MANIFEST.json">素材清單</a>。
+        </p>
+        <p class="foot-fine">&copy; {year} {SITE.publisher}</p>
+      </footer>
+    </div>
+
+    <style>
+      .site-foot {
+        margin-top: var(--sp-9);
+        padding-top: var(--sp-6);
+        padding-bottom: var(--sp-9);
+        border-top: 1px solid var(--border-hairline);
+      }
+
+      .foot-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sp-4);
+        margin-bottom: var(--sp-6);
+      }
+
+      .foot-nav a {
+        font-family: var(--font-ui);
+        font-size: var(--fs-sm);
+        letter-spacing: 0.08em;
+        color: var(--text-primary);
+      }
+
+      .foot-nav a:hover {
+        color: var(--text-accent);
+      }
+
+      .foot-nav .bi-en {
+        margin-left: 4px;
+      }
+
+      .foot-line {
+        margin: 0 0 var(--sp-3);
+        font-family: var(--font-display);
+        font-size: var(--fs-sm);
+        letter-spacing: 0.14em;
+        color: var(--text-secondary);
+      }
+
+      .foot-fine {
+        margin: 0 0 var(--sp-2);
+        font-size: var(--fs-xs);
+        line-height: 1.85;
+        color: var(--text-faint);
+      }
+
+      .foot-fine a {
+        color: var(--text-secondary);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+    </style>
+  </body>
+</html>

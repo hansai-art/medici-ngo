@@ -1,0 +1,10 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*.ts", "**/*.tsx", "**/*.astro"],
+  "//": "functions/ 走自己的 tsconfig：Pages Functions 需要 Cloudflare Workers 的全域型別，那套 Request / Response 跟瀏覽器的定義會打架，混在同一個專案裡兩邊都會錯。",
+  "exclude": ["dist", "node_modules", "_prototypes", "functions"],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "allowJs": true
+  }
+}

@@ -1,0 +1,116 @@
+/* medici.ngo 設計 token
+   色票全部取自維洛及歐與達文西《基督受洗》（1475 前後，烏菲茲美術館藏）的實際像素，
+   不是憑空發明的顏色。抽色方法：poster-ep01.jpg 中位切割量化，見 assets/ASSET-MANIFEST.json。 */
+
+:root {
+  /* 墨：畫作暗部 */
+  --ink:            #0B0A0D;   /* 底色，帶一點藍的黑 */
+  --ink-raised:     #14121A;   /* 卡片 / 浮起面 */
+  --ink-warm:       #1E1A16;   /* 暖調區塊，取自畫作褐色暗部 */
+
+  /* 金：天使光暈 */
+  --gold:           #B08E50;   /* 主金 */
+  --gold-lit:       #D9BC7E;   /* 提亮，用於 hover 與焦點 */
+  --gold-deep:      #64471D;   /* 金的暗部，分隔線與邊框 */
+  --gold-veil:      rgba(176, 142, 80, 0.14);
+
+  /* 次要 accent */
+  --slate:          #4A4E63;   /* 天使藍紫袍 */
+  --blood:          #8E3B26;   /* 基督腰布赭紅，只用於狀態標記 */
+
+  /* 文字 */
+  --parchment:      #E9E1D2;   /* 主文字 */
+  --muted:          #968A79;   /* 次要文字 */
+  --faint:          #5C554B;   /* 三級文字 */
+
+  /* 字型 */
+  --font-display: 'Noto Serif TC', 'Cochin', 'Didot', 'Songti TC', Georgia, serif;
+  --font-body:    'Noto Serif TC', 'Songti TC', Georgia, 'Times New Roman', serif;
+  --font-ui:      'Optima', -apple-system, 'PingFang TC', sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  /* 節奏 */
+  --gutter: 20px;
+  --rule: 1px solid var(--gold-deep);
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  line-height: 1.75;
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; }
+
+a { color: inherit; text-decoration: none; }
+
+/* 骨架文字的雙語小標（規格 §五.2：介面骨架 zh + en 並列） */
+.bi-en {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* 手機優先：原型固定在手機寬度呈現 */
+.phone {
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 切換頁籤（只是原型導覽，不是網站本體元件） */
+.proto-nav {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  display: flex;
+  background: rgba(11, 10, 13, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: var(--rule);
+}
+.proto-nav button {
+  flex: 1;
+  padding: 11px 4px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--faint);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+.proto-nav button[aria-selected='true'] {
+  color: var(--gold-lit);
+  border-bottom-color: var(--gold);
+}
+
+[hidden] { display: none !important; }
+
+/* 橫向捲動列共用 */
+.rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 var(--gutter) 4px;
+  scroll-snap-type: x mandatory;
+  /* 沒有這行的話 scroll-snap 會把第一張卡對齊到容器起點，
+     等於把 padding-left 吃掉（實測 scrollLeft 被設成 20）。 */
+  scroll-padding-left: var(--gutter);
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; flex: 0 0 auto; }

@@ -1,0 +1,16 @@
+{
+  "//": "Pages Functions 的型別環境。跟根目錄的 tsconfig 分開，理由見根目錄那份的註解。",
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "lib": ["es2022"],
+    "types": ["@cloudflare/workers-types"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["**/*.ts"]
+}

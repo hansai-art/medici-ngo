@@ -1,0 +1,566 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, EXTERNAL, LICENSE } from '../lib/site';
+import { getEpisodes, getOpenSlotNumber } from '../lib/episodes';
+import {
+  WORLD_BIBLE,
+  DELIVERABLES,
+  HOOK_RULES,
+  BEAT_TEMPLATE,
+  SHOT_DISCIPLINE,
+  FORMULAS,
+  QUALITY_LOCKS,
+  FINAL_REVIEW,
+  METHOD_SOURCES,
+} from '../lib/relay-engine';
+import { buildGraph, buildOrganization, buildWebSite } from '../lib/seo';
+
+const episodes = await getEpisodes();
+const openSlot = await getOpenSlotNumber();
+const latest = episodes.at(-1);
+
+const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
+---
+
+<BaseLayout
+  title="我要接棒"
+  description={`接下${SITE.name}第 ${openSlot} 集。規則全文、60 秒節奏模板、8 條必勝公式庫與終審五題全部公開，不會用 Git 也能投稿。`}
+  ogImage="/og/join.jpg?v=1"
+  ogImageAlt="我要接棒"
+  jsonLd={jsonLd}
+>
+  <header class="head pad">
+    <p class="kicker">我要接棒 <span class="bi-en">Join the relay</span></p>
+    <h1>接下第 {openSlot} 集</h1>
+    <p class="lede">
+      你做 60 秒。規則全部寫在下面，沒有隱藏條款。
+      看完覺得可以，就填表申請，我們審過會把你加進 repo。
+    </p>
+  </header>
+
+  {
+    latest && (
+      <section class="handoff pad">
+        <h2>你要接的是這個鉤子</h2>
+        <p class="handoff-from">
+          來自第 {latest.data.episode} 集《{latest.data.title}》
+        </p>
+        <ol class="handoff-list">
+          {latest.data.handoffCard.musts.map((m) => (
+            <li>{m}</li>
+          ))}
+        </ol>
+        <p class="handoff-q">{latest.data.handoffCard.cliffhanger}</p>
+        <a class="handoff-link" href={`/ep/${latest.data.episode}`}>
+          先看完第 {latest.data.episode} 集 →
+        </a>
+      </section>
+    )
+  }
+
+  <!-- 01 交付什麼 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">01</span><h2>你要交什麼</h2>
+      <span class="bi-en">Deliverables</span>
+    </div>
+    <dl class="spec pad">
+      {
+        DELIVERABLES.map((d) => (
+          <div>
+            <dt>{d.name}</dt>
+            <dd>{d.detail}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="pad fine">
+      三件套缺一不可。只交影片不交配方的話，這個計畫就只是一個普通的短劇頻道。
+    </p>
+  </section>
+
+  <!-- 02 世界觀 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">02</span><h2>世界觀</h2>
+      <span class="bi-en">World bible</span>
+    </div>
+    <div class="pad prose">
+      <h3>{WORLD_BIBLE.anchor.title}</h3>
+      <p>{WORLD_BIBLE.anchor.body}</p>
+      <h3>{WORLD_BIBLE.rule.title}</h3>
+      <p>{WORLD_BIBLE.rule.body}</p>
+      <h3>必守設定，每一棒都不可違反</h3>
+      <ol class="numbered">
+        {WORLD_BIBLE.musts.map((m) => <li>{m}</li>)}
+      </ol>
+      <h3>策展原則</h3>
+      <p>{WORLD_BIBLE.curation}</p>
+    </div>
+  </section>
+
+  <!-- 03 鉤子鐵律 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">03</span><h2>鉤子鐵律</h2>
+      <span class="bi-en">Hook rules</span>
+    </div>
+    <div class="pad prose">
+      <p class="hard">{HOOK_RULES.core}</p>
+      <h3>合格的斷點只有四種</h3>
+      <ol class="numbered">
+        {HOOK_RULES.validEndings.map((e) => <li>{e}</li>)}
+      </ol>
+      <h3>接鉤的速度</h3>
+      <p>{HOOK_RULES.velocity}</p>
+      <h3>自檢一題</h3>
+      <p class="hard">{HOOK_RULES.selfCheck}</p>
+    </div>
+  </section>
+
+  <!-- 04 節奏模板 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">04</span><h2>60 秒節奏模板</h2>
+      <span class="bi-en">Beat template</span>
+    </div>
+    <dl class="spec pad">
+      {
+        BEAT_TEMPLATE.map((b) => (
+          <div>
+            <dt>{b.range}</dt>
+            <dd>{b.task}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="pad fine">{SHOT_DISCIPLINE}</p>
+  </section>
+
+  <!-- 05 公式庫 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">05</span><h2>必勝公式庫</h2>
+      <span class="bi-en">Formula library</span>
+    </div>
+    <p class="pad fine">
+      想不出來就直接套。公式是產品的一部分，不是丟臉的事：
+      每集頁面都會標注本集用了哪幾條，配方公開，執行見真章。
+    </p>
+    <ol class="formulas pad">
+      {
+        FORMULAS.map((f) => (
+          <li>
+            <span class="f-no">{String(f.n).padStart(2, '0')}</span>
+            <div>
+              <p class="f-name">{f.name}</p>
+              <p class="f-def">{f.definition}</p>
+              <p class="f-ex">示範：{f.example}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- 06 品質守門 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">06</span><h2>品質守門</h2>
+      <span class="bi-en">Quality locks</span>
+    </div>
+    <div class="pad prose">
+      {
+        QUALITY_LOCKS.map((l) => (
+          <>
+            <h3>{l.name}</h3>
+            <p>{l.body}</p>
+          </>
+        ))
+      }
+      <ol class="numbered">
+        {FINAL_REVIEW.map((q) => <li>{q}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 07 怎麼投稿 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">07</span><h2>怎麼投稿</h2>
+      <span class="bi-en">How to submit</span>
+    </div>
+    <ol class="steps pad">
+      <li>
+        <p class="step-t">填申請表</p>
+        <p class="step-b">
+          附上你的作品連結與 GitHub 帳號。審過之後我們會把你加進 repo，
+          你就有權限開分支提交。
+        </p>
+      </li>
+      <li>
+        <p class="step-t">複製範本，填成你的那一集</p>
+        <p class="step-b">
+          範本是一個 markdown 檔，欄位都有註解。
+          鏡數、接點卡、史實註的格式不對，系統會自動擋下來，不會讓你上錯東西。
+        </p>
+      </li>
+      <li>
+        <p class="step-t">開一個 Pull Request</p>
+        <p class="step-b">
+          不會用 Git 也沒關係：在 GitHub 網頁上點 Add file、貼上內容、
+          選 Create a new branch、按 Propose changes，三次點擊就完成，手機也做得到。
+        </p>
+      </li>
+      <li>
+        <p class="step-t">等預覽網址與審核</p>
+        <p class="step-b">
+          系統會自動幫你的分支蓋一個預覽網站，網址直接留言在你的 PR 上。
+          發起人看過預覽、確認過終審五題，按下合併，你的那一集就正式上線。
+        </p>
+      </li>
+    </ol>
+
+    <div class="pad">
+      {
+        EXTERNAL.joinForm ? (
+          <a class="apply" href={EXTERNAL.joinForm} rel="noopener">
+            填申請表，接第 {openSlot} 集
+          </a>
+        ) : (
+          <p class="apply apply--pending">申請表準備中，很快開放</p>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- 授權與來源 -->
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">08</span><h2>授權與方法來源</h2>
+      <span class="bi-en">License &amp; sources</span>
+    </div>
+    <div class="pad prose">
+      <p>
+        你交出來的劇本與提示詞會以 {LICENSE.content.name} 公開，{LICENSE.content.summary}。
+        {LICENSE.video}，我們不會拿你的影片去做別的用途。
+      </p>
+      <h3>短劇引擎的方法來源</h3>
+      <ul class="sources">
+        {
+          METHOD_SOURCES.map((s) => (
+            <li>
+              <a href={s.url} rel="noopener nofollow">
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head {
+    padding-top: var(--sp-8);
+  }
+
+  .kicker {
+    margin: 0 0 var(--sp-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--text-accent);
+  }
+
+  .head h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-xl);
+    line-height: 1.4;
+  }
+
+  .lede {
+    margin: var(--sp-4) 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  /* 接點卡召喚 */
+  .handoff {
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-5);
+    padding-bottom: var(--sp-5);
+    background: var(--bg-warm);
+    border-top: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .handoff h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 600;
+  }
+
+  .handoff-from {
+    margin: 4px 0 var(--sp-4);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .handoff-list {
+    margin: 0;
+    padding-left: 1.2em;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+  }
+
+  .handoff-list li + li {
+    margin-top: var(--sp-2);
+  }
+
+  .handoff-q {
+    margin: var(--sp-4) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    color: var(--text-accent);
+  }
+
+  .handoff-link {
+    display: inline-block;
+    margin-top: var(--sp-4);
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.1em;
+    color: var(--text-accent);
+    border-bottom: 1px solid var(--border-default);
+    padding-bottom: 2px;
+  }
+
+  /* 章節 */
+  .sec {
+    margin-top: var(--sp-8);
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .sec-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-accent);
+  }
+
+  .sec-head h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.2em;
+  }
+
+  .sec-head .bi-en {
+    margin-left: auto;
+  }
+
+  /* 著錄欄 */
+  .spec {
+    margin: var(--sp-4) 0 0;
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .spec div {
+    display: flex;
+    gap: var(--sp-4);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-hairline);
+    font-size: var(--fs-sm);
+  }
+
+  .spec dt {
+    flex: 0 0 6rem;
+    padding-top: 2px;
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+  }
+
+  .spec dd {
+    flex: 1;
+    margin: 0;
+    line-height: 1.8;
+  }
+
+  /* 散文 */
+  .prose {
+    padding-top: var(--sp-4);
+  }
+
+  .prose h3 {
+    margin: var(--sp-5) 0 var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 400;
+    color: var(--text-accent);
+  }
+
+  .prose h3:first-child {
+    margin-top: 0;
+  }
+
+  .prose p {
+    margin: 0;
+    font-size: var(--fs-base);
+    line-height: 1.95;
+  }
+
+  .prose .hard {
+    color: var(--text-accent);
+  }
+
+  .numbered {
+    margin: var(--sp-3) 0 0;
+    padding-left: 1.3em;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .numbered li + li {
+    margin-top: var(--sp-2);
+  }
+
+  .fine {
+    margin: var(--sp-4) 0 0;
+    font-size: var(--fs-xs);
+    line-height: 1.9;
+    color: var(--text-faint);
+  }
+
+  /* 公式庫 */
+  /* NEVER 在這裡寫 padding-left: 0 去清 ol 預設縮排：
+     它會蓋掉 .pad 的左右留白，數字會貼到螢幕邊。
+     list-style: none 就足夠了，.pad 本身已經壓過瀏覽器預設的 padding-inline-start。 */
+  .formulas {
+    margin: var(--sp-4) 0 0;
+    list-style: none;
+  }
+
+  .formulas li {
+    display: flex;
+    gap: var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .f-no {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--text-accent);
+    padding-top: 3px;
+  }
+
+  .f-name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+  }
+
+  .f-def {
+    margin: 3px 0 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+
+  .f-ex {
+    margin: 6px 0 0;
+    font-size: var(--fs-xs);
+    line-height: 1.8;
+    color: var(--text-faint);
+  }
+
+  /* 步驟 */
+  .steps {
+    margin: var(--sp-4) 0 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .steps li {
+    position: relative;
+    padding: var(--sp-4) 0 var(--sp-4) 2.4rem;
+    border-bottom: 1px solid var(--border-hairline);
+    counter-increment: step;
+  }
+
+  .steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: calc(var(--sp-4) + 3px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--text-accent);
+  }
+
+  .step-t {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+  }
+
+  .step-b {
+    margin: 5px 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  /* 申請 */
+  .apply {
+    display: block;
+    margin-top: var(--sp-6);
+    padding: 16px 12px;
+    text-align: center;
+    background: var(--action-bg);
+    color: var(--action-fg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  .apply--pending {
+    background: none;
+    border: 1px dashed var(--border-default);
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .sources {
+    margin: var(--sp-3) 0 0;
+    padding-left: 1.2em;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+  }
+
+  .sources a {
+    color: var(--text-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

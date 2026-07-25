@@ -1,0 +1,380 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, EXTERNAL, LICENSE } from '../lib/site';
+import { getEpisodes } from '../lib/episodes';
+import { buildGraph, buildOrganization, buildWebSite, buildFaqPage } from '../lib/seo';
+
+const episodes = await getEpisodes();
+
+const faq = [
+  {
+    q: '我可以拿這套格式去做別的題材嗎？',
+    a: '可以，而且我們希望你這樣做。接龍格式本身不屬於任何人：60 秒一集、三件套交付、接點卡傳給下一棒，這是一個可以被複製的協定。你要做台灣民間故事接龍、做科幻接龍、做你們公司內部的品牌接龍都行。',
+  },
+  {
+    q: '要付錢或申請授權嗎？',
+    a: `不用。劇本與提示詞採 ${LICENSE.content.name}，署名即可自由使用、改作、商用。網站程式碼採 ${LICENSE.code.name}。你不需要通知我們，也不需要付費。`,
+  },
+  {
+    q: '那我為什麼還要標明出處？',
+    a: 'CC BY 的唯一要求就是署名。務實一點說：標出處對你也有好處，讀者會循著線索找過來，兩邊的接龍都會被更多人看到。這是接龍精神本身。',
+  },
+  {
+    q: '我可以直接用你們的網站程式碼嗎？',
+    a: '可以。整個網站是開源的，包括內容格式定義、自動檢查腳本與部署設定。你把它 clone 下去，換掉內容檔就是你自己的接龍站。',
+  },
+];
+
+const jsonLd = buildGraph([
+  buildOrganization(),
+  buildWebSite(),
+  buildFaqPage(faq),
+]);
+---
+
+<BaseLayout
+  title="自己開一條"
+  description={`${SITE.name}的接龍格式與網站骨架全部開源。60 秒一集、三件套交付、接點卡傳棒，這套協定可以被自由複製到任何題材。`}
+  ogImage="/og/fork.jpg?v=1"
+  ogImageAlt="自己開一條接龍"
+  jsonLd={jsonLd}
+>
+  <header class="head pad">
+    <p class="kicker">自己開一條 <span class="bi-en">Fork the relay</span></p>
+    <h1>這套格式不屬於我們</h1>
+    <p class="lede">
+      文藝復興不是一家公司做出來的。同樣的，接龍也不該只有一條。
+      這一頁告訴你怎麼把整套格式搬去做你自己的題材。
+    </p>
+  </header>
+
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">01</span><h2>接龍協定</h2>
+      <span class="bi-en">The protocol</span>
+    </div>
+    <p class="pad fine">
+      這五條是接龍能運作的最小規則。題材、風格、語言都可以換，這五條換掉就不是接龍了。
+    </p>
+    <ol class="protocol pad">
+      <li>
+        <p class="p-t">每集有長度上限</p>
+        <p class="p-b">我們用 60 秒。上限是什麼不重要，重要的是有上限，逼創作者把力氣花在鉤子上。</p>
+      </li>
+      <li>
+        <p class="p-t">配方跟成品一起交</p>
+        <p class="p-b">影片、完整劇本與提示詞、接點卡，三件套缺一不可。不公開配方的接龍只是連載。</p>
+      </li>
+      <li>
+        <p class="p-t">結尾必須斷在猜不到的地方</p>
+        <p class="p-b">最後 5 秒丟新鉤子。能被一句話猜中下一集開頭，就要重寫結尾。</p>
+      </li>
+      <li>
+        <p class="p-t">接點卡限制下一棒，但不決定內容</p>
+        <p class="p-b">給 3 個必守設定加 1 個懸念。必守防止世界觀崩掉，懸念留給下一棒自由發揮。</p>
+      </li>
+      <li>
+        <p class="p-t">有人終審</p>
+        <p class="p-b">完全沒有守門的接龍會在第三集散掉。要有一個人可以說「這集退回重修」。</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">02</span><h2>怎麼開始</h2>
+      <span class="bi-en">Getting started</span>
+    </div>
+    <ol class="steps pad">
+      <li>
+        <p class="step-t">決定你的時空錨與唯一規則</p>
+        <p class="step-b">
+          我們的時空錨是文藝復興的義大利，唯一規則是「把想像描述得夠精確，它就會短暫成真」。
+          你需要的是同樣結構的一組：一個明確的世界，加一條所有人都要遵守的特殊規則。
+        </p>
+      </li>
+      <li>
+        <p class="step-t">自己做第 1 集</p>
+        <p class="step-b">
+          第 1 集必須由發起人做。你要先示範這個格式長什麼樣子、品質標準在哪裡，
+          別人才知道要接什麼。第 1 集免解上鉤，但一樣要留鉤子。
+        </p>
+      </li>
+      <li>
+        <p class="step-t">把網站骨架 clone 下來</p>
+        <p class="step-b">
+          內容格式定義、自動檢查腳本、部署設定都在裡面。
+          換掉內容檔與品牌字串就是你自己的站。
+        </p>
+      </li>
+      <li>
+        <p class="step-t">邀請第一批接棒者</p>
+        <p class="step-b">
+          從你認識、你信任的人開始。開放給所有人是第二步，
+          不是第一步：接龍的品質基準是靠前三集立起來的。
+        </p>
+      </li>
+    </ol>
+
+    <div class="pad">
+      {
+        EXTERNAL.repo ? (
+          <a class="repo" href={EXTERNAL.repo} rel="noopener">
+            取得網站骨架
+          </a>
+        ) : (
+          <p class="repo repo--pending">
+            開源 repo 整理中。在那之前，這一頁的協定就是全部你需要的東西，
+            拿去用不必等我們。
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">03</span><h2>授權</h2>
+      <span class="bi-en">License</span>
+    </div>
+    <dl class="spec pad">
+      <div>
+        <dt>劇本與提示詞</dt>
+        <dd>
+          <a href={LICENSE.content.url} rel="license">{LICENSE.content.name}</a>
+          ，{LICENSE.content.summary}
+        </dd>
+      </div>
+      <div>
+        <dt>網站程式碼</dt>
+        <dd><a href={LICENSE.code.url} rel="license">{LICENSE.code.name}</a></dd>
+      </div>
+      <div><dt>影片</dt><dd>{LICENSE.video}</dd></div>
+      <div>
+        <dt>主視覺素材</dt>
+        <dd>
+          目前使用的畫作全部是公共領域或 CC0，來源明細見
+          <a href="/credits/ASSET-MANIFEST.json">素材清單</a>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head pad">
+      <span class="sec-no">04</span><h2>常見問題</h2>
+      <span class="bi-en">FAQ</span>
+    </div>
+    <div class="pad">
+      {
+        faq.map((item) => (
+          <div class="faq">
+            <h3>{item.q}</h3>
+            <p>{item.a}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <p class="pad closing">
+    目前這條接龍走到第 {episodes.length} 集。
+    如果你開了另一條，我們很想看看。
+  </p>
+</BaseLayout>
+
+<style>
+  .head { padding-top: var(--sp-8); }
+
+  .kicker {
+    margin: 0 0 var(--sp-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--text-accent);
+  }
+
+  .head h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-xl);
+    line-height: 1.4;
+  }
+
+  .lede {
+    margin: var(--sp-4) 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .sec { margin-top: var(--sp-8); }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .sec-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-accent);
+  }
+
+  .sec-head h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.2em;
+  }
+
+  .sec-head .bi-en { margin-left: auto; }
+
+  .fine {
+    margin: var(--sp-4) 0 0;
+    font-size: var(--fs-xs);
+    line-height: 1.9;
+    color: var(--text-faint);
+  }
+
+  /* 不清 padding-left：那會蓋掉 .pad 的左右留白，序號會貼到螢幕邊 */
+  .protocol,
+  .steps {
+    margin: var(--sp-4) 0 0;
+    list-style: none;
+    counter-reset: item;
+  }
+
+  .protocol li,
+  .steps li {
+    position: relative;
+    padding: var(--sp-4) 0 var(--sp-4) 2.4rem;
+    border-bottom: 1px solid var(--border-hairline);
+    counter-increment: item;
+  }
+
+  .protocol li::before,
+  .steps li::before {
+    content: counter(item, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: calc(var(--sp-4) + 3px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--text-accent);
+  }
+
+  .p-t,
+  .step-t {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+  }
+
+  .p-b,
+  .step-b {
+    margin: 5px 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .repo {
+    display: block;
+    margin-top: var(--sp-6);
+    padding: 16px 12px;
+    text-align: center;
+    background: var(--action-bg);
+    color: var(--action-fg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  .repo--pending {
+    background: none;
+    border: 1px dashed var(--border-default);
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    line-height: 1.9;
+    letter-spacing: 0;
+    text-align: left;
+    padding: var(--sp-4);
+  }
+
+  .spec {
+    margin: var(--sp-4) 0 0;
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .spec div {
+    display: flex;
+    gap: var(--sp-4);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-hairline);
+    font-size: var(--fs-sm);
+  }
+
+  .spec dt {
+    flex: 0 0 6rem;
+    padding-top: 2px;
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+  }
+
+  .spec dd {
+    flex: 1;
+    margin: 0;
+    line-height: 1.8;
+  }
+
+  .spec a {
+    color: var(--text-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .faq { padding-top: var(--sp-5); }
+
+  .faq + .faq {
+    margin-top: var(--sp-4);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .faq h3 {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 400;
+    color: var(--text-accent);
+  }
+
+  .faq p {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.95;
+    color: var(--text-secondary);
+  }
+
+  .closing {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--border-default);
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+</style>

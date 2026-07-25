@@ -1,0 +1,39 @@
+{
+  "name": "medici-ngo",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "動畫接龍 medici.ngo：AI 短劇接力連載與共編平台，美第奇 AI 學院出品",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint:content": "node scripts/lint-content.mjs",
+    "lint:design": "./scripts/lint-design-tokens.sh",
+    "lint": "npm run lint:content && npm run lint:design",
+    "test": "node --test scripts/*.test.mjs",
+    "check:layout": "node scripts/check-layout.mjs",
+    "verify": "npm run lint && npm run test && npm run check && npm run check:functions && npm run build && npm run check:layout",
+    "check:functions": "tsc -p functions/tsconfig.json",
+    "dev:api": "wrangler pages dev dist --d1=DB",
+    "db:init": "wrangler d1 execute medici-ngo --local --file=./schema.sql"
+  },
+  "dependencies": {
+    "astro": "^6.4.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@cloudflare/workers-types": "^5.20260724.1",
+    "@tailwindcss/vite": "4.2.2",
+    "playwright": "1.59.1",
+    "sharp": "^0.35.3",
+    "tailwindcss": "4.2.2",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.91.0"
+  },
+  "comments": {
+    "playwright-pin": "版本鎖死不加 ^：playwright 每個 minor 版都綁一組自己的瀏覽器建置，浮動版號會讓本機快取的瀏覽器對不上、CI 也跟本機跑在不同版。要升版就連同 `npx playwright install chromium` 一起做。",
+    "tailwind-pin": "@tailwindcss/vite 4.3.x 依賴 Vite 8（rolldown），但 Astro 6.4.8 帶的是 Vite 7，兩份 Vite 併存會炸在 `Missing field tsconfigPaths on BindingViteResolvePluginConfig`。4.2.2 會 dedupe 到 Astro 的 Vite 7，是 aiterms.tw 線上驗證過的組合。要升 Tailwind 必須同時確認 Astro 的 Vite 主版本。"
+  }
+}

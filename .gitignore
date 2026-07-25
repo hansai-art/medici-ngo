@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.env
+.env.*
+!.env.example
+.DS_Store
+_prototypes/_shots/
+*.log
+
+# 原始畫作（11MB 公共領域素材）不進版控：
+# 網站實際用的是 src/assets/ 底下的裁切版，原檔隨時能照
+# public/credits/ASSET-MANIFEST.json 的 descurl 重新下載。
+# 讓每個共編者 clone 11MB 的原檔沒有意義。
+_prototypes/assets/

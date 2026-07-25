@@ -1,0 +1,173 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  episode: number;
+  title: string;
+  videoId: string | null;
+  poster: ImageMetadata;
+}
+
+const { episode, title, videoId, poster } = Astro.props;
+---
+
+{
+  videoId ? (
+    <div class="stage" data-player-mount data-episode={episode} data-title={title}>
+      {/*
+        enablejsapi=1 是秒級追蹤的前提，沒有它 IFrame API 抓不到播放位置。
+        youtube-nocookie 網域在使用者播放前不落追蹤 cookie。
+      */}
+      <iframe
+        id={`yt-${episode}`}
+        class="stage-frame"
+        src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&rel=0&playsinline=1`}
+        title={`第 ${episode} 集：${title}`}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        loading="lazy"
+      />
+    </div>
+  ) : (
+    <div class="stage stage--soon">
+      <Image
+        src={poster}
+        alt=""
+        widths={[390, 780]}
+        sizes="(min-width: 900px) 720px, 100vw"
+        class="stage-poster"
+      />
+      <div class="stage-veil" aria-hidden="true" />
+      <div class="stage-body">
+        <p class="stage-badge">影片製作中</p>
+        <p class="stage-note">
+          配方先於成品公開。完整劇本與 {' '}
+          <a href="#prompts">全部提示詞</a> 都在下面，你現在就能做出自己的版本。
+        </p>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  /* 短劇是直式的，播放區固定 9:16 */
+  .stage {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    max-height: 82svh;
+    margin: 0 auto;
+    border: 1px solid var(--border-default);
+    background: var(--bg-inset);
+    overflow: hidden;
+  }
+
+  .stage-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .stage-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .stage-veil {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(90% 60% at 50% 45%, transparent 20%, rgba(11, 10, 13, 0.86) 100%),
+      linear-gradient(rgba(11, 10, 13, 0.55), rgba(11, 10, 13, 0.9));
+  }
+
+  .stage-body {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-6);
+    text-align: center;
+  }
+
+  .stage-badge {
+    justify-self: center;
+    margin: 0;
+    padding: 8px 16px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-accent);
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.28em;
+  }
+
+  .stage-note {
+    margin: 0;
+    max-width: 26ch;
+    font-size: var(--fs-sm);
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  .stage-note a {
+    color: var(--text-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>
+
+<script>
+  import { trackPlayer, type YtPlayer } from '../lib/watch-tracker';
+
+  const mount = document.querySelector<HTMLElement>('[data-player-mount]');
+
+  if (mount) {
+    const episode = Number(mount.dataset.episode);
+    const title = mount.dataset.title ?? '';
+    const frameId = `yt-${episode}`;
+
+    // IFrame API 只載入一次，且延到播放器進入視窗才載，
+    // 不讓它在首屏就跟 LCP 搶頻寬。
+    const loadApi = (): Promise<void> =>
+      new Promise((resolve) => {
+        const w = window as unknown as {
+          YT?: { Player: new (id: string, opts: unknown) => YtPlayer };
+          onYouTubeIframeAPIReady?: () => void;
+        };
+        if (w.YT?.Player) return resolve();
+
+        const prev = w.onYouTubeIframeAPIReady;
+        w.onYouTubeIframeAPIReady = () => {
+          prev?.();
+          resolve();
+        };
+
+        if (!document.querySelector('script[data-yt-api]')) {
+          const s = document.createElement('script');
+          s.src = 'https://www.youtube.com/iframe_api';
+          s.async = true;
+          s.dataset.ytApi = 'true';
+          document.head.appendChild(s);
+        }
+      });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer.disconnect();
+        void loadApi().then(() => {
+          const w = window as unknown as {
+            YT: { Player: new (id: string, opts: unknown) => YtPlayer };
+          };
+          const player = new w.YT.Player(frameId, {});
+          trackPlayer(player, { episode, title, videoId: '' });
+        });
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(mount);
+  }
+</script>

@@ -1,0 +1,60 @@
+/* 第二層：semantic token（語意層）
+ *
+ * 頁面與元件只能用這一層。改視覺時只改這裡，不動 primitive，也不動頁面。
+ *
+ * 本站刻意只有深色一種主題，沒有淺色模式、沒有主題切換鈕。
+ * 理由：這是一個放映短劇的地方，深色是內容的一部分而不是使用者偏好。
+ * 因為沒有雙主題，所以不需要每個 token 給 light/dark 兩個值，
+ * 也不需要 JS 強制套 class。若未來要加淺色模式，在這一層補 :root[data-theme='light'] 即可，
+ * 頁面與元件一行都不用改。
+ */
+
+:root {
+  /* 底層 */
+  --bg-page: var(--c-ink-900);
+  --bg-raised: var(--c-ink-700);
+  --bg-warm: var(--c-ink-600);
+  --bg-inset: #000;
+
+  /* 文字 */
+  --text-primary: var(--c-parchment-100);
+  --text-secondary: var(--c-parchment-500);
+  --text-faint: var(--c-parchment-700);
+  --text-accent: var(--c-gold-400);
+  --text-on-accent: var(--c-ink-900);
+
+  /* 線與框 */
+  --border-hairline: rgba(100, 71, 29, 0.30);
+  --border-default: var(--c-gold-800);
+  --border-strong: var(--c-gold-500);
+  --border-subtle: rgba(233, 225, 210, 0.10);
+
+  /* 行動點：全站只有一種主要行動色 */
+  --action-bg: var(--c-gold-500);
+  --action-fg: var(--c-ink-900);
+  --action-bg-hover: var(--c-gold-400);
+  --action-ghost-border: rgba(233, 225, 210, 0.28);
+
+  /* 資料視覺化：投票長條與續看曲線共用同一組，
+     兩邊都是「同一個底槽 + 金色填色」，不各自發明顏色 */
+  --chart-track: rgba(233, 225, 210, 0.10);
+  --chart-fill: var(--c-gold-500);
+  --chart-fill-dim: var(--c-gold-800);
+
+  /* 狀態 */
+  --status-open: var(--c-gold-400);      /* 開放接棒 */
+  --status-wip: var(--c-parchment-500);  /* 製作中 */
+  --status-fiction: var(--c-clay-400);   /* 戲劇虛構標記 */
+
+  /* 字型
+     中文襯線用 Noto Serif TC（自架子集，不打 Google Fonts，避免第三方請求拖慢 LCP）。
+     mono 用系統字，提示詞區塊要的是等寬與可讀，不需要特殊字型。 */
+  --font-display: 'Noto Serif TC', 'Songti TC', Georgia, serif;
+  --font-body: 'Noto Serif TC', 'Songti TC', Georgia, serif;
+  --font-ui: 'Optima', -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* 版面 */
+  --gutter: var(--sp-5);
+  --measure: 34rem;
+}

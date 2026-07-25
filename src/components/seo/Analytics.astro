@@ -1,0 +1,91 @@
+---
+/**
+ * 追蹤層。
+ *
+ * 刻意不把腳本直接塞進 head。GA4 與 Clarity 都延到「首次互動或瀏覽器閒置」才載入，
+ * 因為追蹤碼堆疊會拖垮 LCP 與 INP，而 Core Web Vitals 是排名因素：
+ * 把所有追蹤碼塞滿 head 會直接反咬 SEO 目標。
+ *
+ * 延後載入不會少收資料：真實使用者一定會捲動或停留超過幾秒，
+ * 只有那些 0 秒就跳走的請求會漏掉，而那些本來就沒有分析價值。
+ *
+ * /internal/ 底下的頁面完全不載入追蹤，避免自己的後台污染數據。
+ */
+const GA4_ID = import.meta.env.PUBLIC_GA4_ID ?? '';
+const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID ?? '';
+const CF_BEACON = import.meta.env.PUBLIC_CF_BEACON_TOKEN ?? '';
+
+const isProd = import.meta.env.PROD;
+const path = Astro.url.pathname;
+const excluded = path.startsWith('/internal');
+const enabled = isProd && !excluded;
+---
+
+{
+  enabled && (
+    <script
+      is:inline
+      define:vars={{ GA4_ID, CLARITY_ID, CF_BEACON }}
+      data-analytics-loader
+    >
+      (function () {
+        var fired = false;
+
+        function loadScript(src, attrs) {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = src;
+          if (attrs) {
+            Object.keys(attrs).forEach(function (k) {
+              s.setAttribute(k, attrs[k]);
+            });
+          }
+          document.head.appendChild(s);
+          return s;
+        }
+
+        function boot() {
+          if (fired) return;
+          fired = true;
+
+          if (GA4_ID) {
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = function () {
+              window.dataLayer.push(arguments);
+            };
+            window.gtag('js', new Date());
+            // send_page_view 交給我們自己送，才能帶上集數等自訂參數
+            window.gtag('config', GA4_ID, { send_page_view: true });
+            loadScript('https://www.googletagmanager.com/gtag/js?id=' + GA4_ID);
+          }
+
+          if (CLARITY_ID) {
+            window.clarity =
+              window.clarity ||
+              function () {
+                (window.clarity.q = window.clarity.q || []).push(arguments);
+              };
+            loadScript('https://www.clarity.ms/tag/' + CLARITY_ID);
+          }
+
+          if (CF_BEACON) {
+            loadScript('https://static.cloudflareinsights.com/beacon.min.js', {
+              'data-cf-beacon': JSON.stringify({ token: CF_BEACON }),
+            });
+          }
+        }
+
+        // 首次互動就載，或最多等到閒置 / 3 秒後
+        ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+          window.addEventListener(evt, boot, { once: true, passive: true });
+        });
+
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(boot, { timeout: 3000 });
+        } else {
+          setTimeout(boot, 3000);
+        }
+      })();
+    </script>
+  )
+}
