@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="動畫接龍">
+  <!--
+    分頁圖示在 16px 見方，任何細節都會糊掉，所以只留三個資訊：
+    深色底（跟站一致）、金色（品牌色）、播放三角形（這是放短劇的地方）。
+    外圈缺一角是接棒的意思：這一環沒有閉合，下一棒才接得上。
+  -->
+  <rect width="64" height="64" rx="12" fill="#0B0A0D" />
+  <!-- 線寬 7 是為了 16px：實測 5 的時候圓環在分頁上糊成一團 -->
+  <path
+    d="M32 9a23 23 0 1 1-16.3 6.7"
+    fill="none"
+    stroke="#C9A24B"
+    stroke-width="7"
+    stroke-linecap="round"
+  />
+  <path d="M26 20.5 47 32 26 43.5Z" fill="#C9A24B" />
+</svg>

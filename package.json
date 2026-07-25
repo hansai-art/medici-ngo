@@ -14,10 +14,16 @@
     "lint": "npm run lint:content && npm run lint:design",
     "test": "node --test scripts/*.test.mjs",
     "check:layout": "node scripts/check-layout.mjs",
-    "verify": "npm run lint && npm run test && npm run check && npm run check:functions && npm run build && npm run check:layout",
+    "verify": "npm run lint && npm run test && npm run check && npm run check:functions && npm run build && npm run check:layout && npm run check:font && npm run check:meta",
     "check:functions": "tsc -p functions/tsconfig.json",
     "dev:api": "wrangler pages dev dist --d1=DB",
-    "db:init": "wrangler d1 execute medici-ngo --local --file=./schema.sql"
+    "db:init": "wrangler d1 execute medici-ngo --local --file=./schema.sql",
+    "font:collect": "node scripts/collect-glyphs.mjs",
+    "font:build": "npm run build && npm run font:collect && python3 scripts/subset-font.py ${NOTO_SRC:-./_fonts}",
+    "check:font": "node scripts/check-font-coverage.mjs",
+    "og:build": "node scripts/build-og.mjs",
+    "seo:indexnow": "node scripts/indexnow.mjs",
+    "check:meta": "node scripts/check-meta.mjs"
   },
   "dependencies": {
     "astro": "^6.4.8"

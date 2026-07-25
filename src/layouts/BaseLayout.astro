@@ -1,7 +1,7 @@
 ---
 import BaseHead from '../components/seo/BaseHead.astro';
 import Analytics from '../components/seo/Analytics.astro';
-import { SITE, LICENSE } from '../lib/site';
+import { SITE, LICENSE, SISTER_SITES } from '../lib/site';
 import '../styles/global.css';
 
 interface Props {
@@ -50,6 +50,15 @@ const year = new Date().getFullYear();
         </nav>
 
         <p class="foot-line">{SITE.name}　{SITE.publisher} 出品</p>
+
+        {/* 姊妹站互鏈。同一群人做的站互相指過去，
+            對讀者是延伸閱讀，對搜尋引擎是主題相關性訊號。
+            NEVER 加 nofollow：這幾個站都是自己的，等於自己掐自己的連結權重。 */}
+        <nav aria-label="姊妹站" class="foot-sisters">
+          <a href={SISTER_SITES.academy}>美第奇 AI 學院 <span class="bi-en">medici.work</span></a>
+          <a href={SISTER_SITES.aiterms}>AI 術語詞典 <span class="bi-en">aiterms.tw</span></a>
+          <a href={SISTER_SITES.techhanlin}>科技翰林院 <span class="bi-en">techhanlin.tw</span></a>
+        </nav>
         <p class="foot-fine">
           劇本與提示詞採 <a href={LICENSE.content.url} rel="license">{LICENSE.content.name}</a>，
           {LICENSE.content.summary}。{LICENSE.video}。
@@ -98,6 +107,22 @@ const year = new Date().getFullYear();
         font-size: var(--fs-sm);
         letter-spacing: 0.14em;
         color: var(--text-secondary);
+      }
+
+      .foot-sisters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sp-2) var(--sp-4);
+        margin: 0 0 var(--sp-5);
+      }
+
+      .foot-sisters a {
+        font-size: var(--fs-xs);
+        color: var(--text-secondary);
+      }
+
+      .foot-sisters a:hover {
+        color: var(--text-accent);
       }
 
       .foot-fine {

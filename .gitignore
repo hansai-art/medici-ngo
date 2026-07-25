@@ -14,3 +14,7 @@ _prototypes/_shots/
 # public/credits/ASSET-MANIFEST.json 的 descurl 重新下載。
 # 讓每個共編者 clone 11MB 的原檔沒有意義。
 _prototypes/assets/
+
+# 完整的 Noto Serif TC 原檔（兩個字重共 15MB）。
+# 只有切子集與產 OG 圖時需要，取得方式見 docs/OPERATIONS.md。
+_fonts/

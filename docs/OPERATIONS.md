@@ -98,7 +98,44 @@ npx wrangler d1 execute medici-ngo --remote \
 三個腳本都只在 production 載入，而且延到首次互動或 idle 才載。
 `/internal` 底下不掛任何追蹤，不然我們自己看數據會污染數據。
 
-## 7. 隱私立場
+## 7. 素材重建（字型與 OG 圖）
+
+字型子集與 OG 圖是產生出來的檔案，不是手工做的。兩者都需要完整的
+Noto Serif TC 原檔（各 7.6 MB，SIL Open Font License 1.1，不進版控）：
+
+```bash
+mkdir -p _fonts && cd _fonts
+curl -LO https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/TC/NotoSerifTC-Regular.otf
+curl -LO https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/TC/NotoSerifTC-Bold.otf
+```
+
+放別的位置就設 `NOTO_SRC=/path/to/fonts`。子集需要 `pip3 install fonttools brotli`。
+
+| 什麼時候要重跑 | 指令 |
+|---|---|
+| 加了新內容、出現原本沒有的字 | `npm run font:build` |
+| 改了頁面標題或說明文字 | `npm run og:build` |
+| 兩者都懶得判斷 | 兩個都跑，各約 30 秒 |
+
+忘了跑不會靜靜地過去：`npm run check:font` 會列出缺哪些字，
+`npm run check:meta` 會指出哪一頁的 OG 圖不存在。兩個都在 `npm run verify` 裡。
+
+**換了 OG 圖的內容，MUST 同時把頁面的 `ogImage` 版本號往上加**（`?v=1` → `?v=2`）。
+LINE 會用網址當快取鍵，不換網址就永遠是舊圖，而且你在自己手機上看不出來。
+
+## 8. 搜尋引擎驗證與收錄
+
+| 平台 | 驗證方式 | 之後要做什麼 |
+|---|---|---|
+| Google Search Console | DNS TXT（Cloudflare 加一筆） | 提交 `https://medici.ngo/sitemap.xml` |
+| Bing Webmaster Tools | 可以直接從 GSC 匯入 | 同上 |
+| IndexNow | 已備好，金鑰檔在 `public/` | 部署後跑 `npm run seo:indexnow` |
+
+IndexNow **只在真的有內容變動之後跑**，NEVER 每次部署都送：
+短時間重複送同一批網址會被降權處理。先用 `node scripts/indexnow.mjs --dry-run`
+看要送哪些網址。
+
+## 9. 隱私立場
 
 不存 IP、不存 User-Agent、不做裝置指紋。session id 是隨機值放 sessionStorage，
 關掉分頁就消失，不落 cookie，所以不需要 cookie 同意橫幅。
