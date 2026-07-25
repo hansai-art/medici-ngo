@@ -22,22 +22,44 @@
   --text-faint: var(--c-parchment-700);
   --text-accent: var(--c-gold-400);
   --text-on-accent: var(--c-ink-900);
+  --text-on-image: rgba(233, 225, 210, 0.82);  /* 壓在海報上的說明文字 */
+  --text-code: rgba(233, 225, 210, 0.78);      /* 提示詞區塊的等寬內文 */
+
+  /* 影像上的文字陰影：沒有這個，遇到亮的海報字就消失了。
+     三階只差在擴散半徑，顏色一律純黑。 */
+  --text-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.9);
+  --text-shadow-md: 0 2px 18px rgba(0, 0, 0, 0.9);
+  --text-shadow-lg: 0 4px 30px rgba(0, 0, 0, 0.85);
+
+  /* 遮罩：壓在影像上讓字讀得到。跟 --bg-page 同一個墨色，只有濃度不同。
+     全站只有這五階，頁面 NEVER 自己調 alpha，不然每一頁的暗角都會長得不一樣。 */
+  --scrim-soft: rgba(11, 10, 13, 0.55);
+  --scrim-mid: rgba(11, 10, 13, 0.62);
+  --scrim-edge: rgba(11, 10, 13, 0.70);
+  --scrim-deep: rgba(11, 10, 13, 0.88);
+  --scrim-solid: rgba(11, 10, 13, 0.93);
 
   /* 線與框 */
   --border-hairline: rgba(100, 71, 29, 0.30);
   --border-default: var(--c-gold-800);
   --border-strong: var(--c-gold-500);
   --border-subtle: rgba(233, 225, 210, 0.10);
+  --border-accent-soft: rgba(176, 142, 80, 0.50);  /* 虛線框：待接棒的空位 */
+
+  /* 金色的極淡覆蓋 */
+  --surface-accent-wash: rgba(176, 142, 80, 0.08);  /* hover 時浮起來的底 */
+  --paper-rule: rgba(176, 142, 80, 0.045);          /* 手稿紙的橫線 */
 
   /* 行動點：全站只有一種主要行動色 */
   --action-bg: var(--c-gold-500);
   --action-fg: var(--c-ink-900);
   --action-bg-hover: var(--c-gold-400);
   --action-ghost-border: rgba(233, 225, 210, 0.28);
+  --action-ghost-bg: rgba(233, 225, 210, 0.10);
 
-  /* 資料視覺化：投票長條與續看曲線共用同一組，
-     兩邊都是「同一個底槽 + 金色填色」，不各自發明顏色 */
-  --chart-track: rgba(233, 225, 210, 0.10);
+  /* 資料視覺化：投票長條、續看曲線、「繼續觀看」進度條共用同一組，
+     三邊都是「同一個底槽 + 金色填色」，不各自發明顏色 */
+  --chart-track: rgba(233, 225, 210, 0.14);
   --chart-fill: var(--c-gold-500);
   --chart-fill-dim: var(--c-gold-800);
 

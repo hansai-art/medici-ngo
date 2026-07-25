@@ -58,7 +58,7 @@ const levelClass: Record<string, string> = {
   <header class="file-head pad">
     <div>
       <p class="file-mark">{SITE.name}</p>
-      <p class="file-mirror">{SITE.publisher}</p>
+      <p class="file-sub">{SITE.publisher} 出品</p>
     </div>
     <p class="file-code">
       EP {String(d.episode).padStart(2, '0')}<br />{d.shots.length} SHOTS
@@ -300,7 +300,7 @@ const levelClass: Record<string, string> = {
 <style>
   /* 手稿紙的橫線。極淡，只提供質感不干擾閱讀 */
   :global(body) {
-    background-image: linear-gradient(rgba(176, 142, 80, 0.045) 1px, transparent 1px);
+    background-image: linear-gradient(var(--paper-rule) 1px, transparent 1px);
     background-size: 100% 30px;
     background-position: 0 -1px;
   }
@@ -321,16 +321,16 @@ const levelClass: Record<string, string> = {
     letter-spacing: 0.3em;
   }
 
-  /* 鏡像字，呼應達文西的鏡像筆記本（本季道具）。
-     transform-origin 不能設 left，否則整段字會翻到自身左側跑出畫面。 */
-  .file-mirror {
-    display: inline-block;
+  /* 這裡原本做成鏡像字（呼應達文西的鏡像筆記本），2026-07-25 拿掉了：
+     鏡像的那一行是出品方全名，翻過來就變成沒人讀得懂的字。
+     出品方名稱是對外正式名稱，NEVER 為了視覺梗把它弄到讀不出來。
+     達文西的梗留給裝飾性字串，不放品牌名。 */
+  .file-sub {
     margin: 5px 0 0;
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     letter-spacing: 0.2em;
-    color: var(--border-default);
-    transform: scaleX(-1);
+    color: var(--text-faint);
   }
 
   .file-code {
@@ -572,7 +572,7 @@ const levelClass: Record<string, string> = {
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
     line-height: 1.78;
-    color: rgba(233, 225, 210, 0.78);
+    color: var(--text-code);
     white-space: pre-wrap;
     word-break: break-word;
   }

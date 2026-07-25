@@ -78,8 +78,8 @@ const { episode, title, videoId, poster } = Astro.props;
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(90% 60% at 50% 45%, transparent 20%, rgba(11, 10, 13, 0.86) 100%),
-      linear-gradient(rgba(11, 10, 13, 0.55), rgba(11, 10, 13, 0.9));
+      radial-gradient(90% 60% at 50% 45%, transparent 20%, var(--scrim-deep) 100%),
+      linear-gradient(var(--scrim-soft), var(--scrim-deep));
   }
 
   .stage-body {

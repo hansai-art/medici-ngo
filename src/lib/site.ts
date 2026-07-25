@@ -14,6 +14,14 @@ export const SITE = {
   tagline: '每集 60 秒，劇本與提示詞全部公開，下一集誰接沒人知道',
   description:
     '動畫接龍是一場 AI 短劇接力：每位創作者做 60 秒的一集，交出完整劇本與提示詞，讓下一個人接下去。觀眾與作者都猜不到下一集。美第奇 AI 學院出品。',
+  /**
+   * 手機網址列與 PWA 標題列的底色。
+   * MUST 等於 src/styles/tokens/primitive.css 的 --c-ink-900：
+   * `<meta>` 吃不到 CSS 變數，只能在這裡把值再寫一次。
+   * 兩邊漂掉的話手機上網址列會跟頁面差一階，肉眼很難注意到，
+   * 所以 scripts/lint-design-tokens.sh 第 6 項會比對這兩個值。
+   */
+  themeColor: '#0B0A0D',
 } as const;
 
 /** 姊妹站。內鏈用，也寫進 JSON-LD 的 sameAs */
