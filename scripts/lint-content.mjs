@@ -224,6 +224,31 @@ for (const file of files) {
   });
 }
 
+// ---- 7. PR 範本的終審五題必須跟規則正本一字不差 ----
+// 正本是 src/lib/relay-engine.ts 的 FINAL_REVIEW，網站 /join 也是讀它。
+// PR 範本要重抄一份，是因為那是創作者按下送出的那一刻唯一會看到的清單。
+// 抄了就會漂，所以用機器釘住。
+{
+  const engine = await readFile(join(ROOT, 'src/lib/relay-engine.ts'), 'utf8');
+  const block = engine.match(/FINAL_REVIEW = \[([\s\S]*?)\] as const/);
+  if (!block) {
+    fail('src/lib/relay-engine.ts', '找不到 FINAL_REVIEW，PR 範本的同步檢查失效了');
+  } else {
+    const items = [...block[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+    const template = await readFile(join(ROOT, '.github/pull_request_template.md'), 'utf8');
+    for (const item of items) {
+      // 範本的清單項省略句尾標點，比對時一起去掉
+      const bare = item.replace(/[？。]$/, '');
+      if (!template.includes(bare)) {
+        fail('.github/pull_request_template.md', `終審五題少了「${item}」（正本在 relay-engine.ts）`);
+      }
+    }
+    if (items.length !== 5) {
+      fail('src/lib/relay-engine.ts', `FINAL_REVIEW 有 ${items.length} 題，不是五題。改了就要同步改 PR 範本與 /join`);
+    }
+  }
+}
+
 if (failures.length) {
   console.error(`內容檢查失敗 ${failures.length} 項：`);
   failures.forEach((f) => console.error(`  ✗ ${f}`));
