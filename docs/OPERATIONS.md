@@ -17,9 +17,15 @@ Cloudflare Dashboard → 右上角頭像 → **API Tokens** → Create Token →
 | 欄位 | 填什麼 |
 |---|---|
 | Permissions | `Account` → `Cloudflare Pages` → **Edit**（範本已含，確認有就好） |
+| Permissions（再加一列） | `Zone` → `DNS` → **Edit** |
 | Account Resources | Include → `Hans@groupg.org's Account` |
-| Zone Resources | All zones（綁自訂網域時會用到） |
+| Zone Resources | Include → Specific zone → `medici.ngo` |
 | TTL | 不設到期，或設一年並記得續 |
+
+**`Zone → DNS → Edit` 這一列不能省**。Pages 的「加自訂網域」API 只是登記，
+真正把流量導過來的是 DNS 記錄；沒有 DNS 權限的話 API 會回成功，
+網域狀態卻永遠停在 `pending / CNAME record not set`，而瀏覽器打開看到的是舊站，
+很容易誤判成「綁好了」。
 
 拿到 token 之後：
 
