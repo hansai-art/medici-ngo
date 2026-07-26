@@ -41,8 +41,11 @@ export const EXTERNAL = {
   youtubeChannel: '',
   /** TODO(Hans): 接棒申請 Google Form 建好後填入 */
   joinForm: '',
-  /** TODO(Hans): GitHub Organization 建好後填入 */
-  repo: '',
+  /**
+   * 網站與內容的正本。2026-07-26 先開在個人帳號底下，
+   * 之後轉進 Organization 時 GitHub 會自動保留舊網址轉址，這裡再改成新網址即可。
+   */
+  repo: 'https://github.com/hansai-art/medici-ngo',
 } as const;
 
 /** 授權 */
