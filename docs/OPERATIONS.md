@@ -62,9 +62,23 @@ npm run build
 npm run dev:api      # http://localhost:8788，含 Functions 與本機 D1
 ```
 
-## 3. 保護 /internal 與 /api/stats（上線前必做）
+## 3. 保護 /internal 與 /api/stats（等第 1 集上線前做）
 
-儀表板現在只靠 robots.txt 擋爬蟲，**那不是存取控制**，任何人打得到網址就看得到數字。
+> **現況（2026-07-26 Hans 裁決：先不設）**：儀表板目前查不到任何東西，
+> D1 是空的、影片還沒上，沒有營運資料可外洩。等第 1 集上線、開始有真實續看資料之前再設。
+>
+> **先看這段再動手，這個帳號有兩道權限牆**：
+> - Zero Trust 的控制台在 `one.dash.cloudflare.com`，是**另一個網域**。
+>   AI agent 的瀏覽器權限預設只涵蓋 `dash.cloudflare.com`，
+>   在那邊點不動（能導航，但截圖與點擊都會被擋）。
+> - 走 API 需要 `Access: Apps → Edit` 的權杖，但 `dash.cloudflare.com/<account>/api-tokens`
+>   對這個登入身分回 `Unauthorized to access requested resource`，
+>   使用者層級的權杖頁也列不出 medici.ngo 所屬的那個帳號，建不出對的權杖。
+>
+> 同一個登入改得動 DNS、Pages、D1、Redirect Rules（都實際動過），
+> 但 Zero Trust 與該帳號的權杖管理是關著的。要 AI 代設就得先開這兩道其中一道。
+
+儀表板只靠 robots.txt 擋爬蟲，**那不是存取控制**，任何人打得到網址就看得到數字。
 資料本身不含個資，但那是我們的營運資料。
 
 Cloudflare Dashboard → Zero Trust → Access → Applications → Add an application：
