@@ -18,7 +18,7 @@
 | 項目 | 選擇 | 為什麼 |
 |---|---|---|
 | 框架 | Astro 6，static output，不裝 adapter | 頁面 100% 靜態，JS 只在必要處 inline |
-| 部署 | Cloudflare Pages + GitHub 整合 | 只有 Pages 的 Git 整合會為 PR 自動產生預覽網址，這是共編流程的前提 |
+| 部署 | GitHub Actions 建置 → `wrangler pages deploy` | 建置不吃 Cloudflare 額度，而且預覽網址只有在檢查全過之後才會出現 |
 | 動態端點 | Cloudflare Pages Functions（`functions/`） | 只有兩個：`/api/beat` 追蹤、`/api/vote` 投票 |
 | 資料 | Cloudflare D1 | 免費額度每天 10 萬筆寫入，遠超需求。沒有後台，內容全在 Git |
 | 樣式 | 三層 token（primitive → semantic → 頁面） | 改視覺只改 `src/styles/tokens/semantic.css`，不動頁面 |
@@ -65,7 +65,7 @@ npm run verify
 | `npm run seo:indexnow` | 內容真的有變動之後才送，NEVER 每次部署都送 |
 
 `font:build` 與 `og:build` 需要 Noto Serif TC 原檔，取得方式見
-[docs/OPERATIONS.md](docs/OPERATIONS.md) 第 7 節。
+[docs/OPERATIONS.md](docs/OPERATIONS.md) 第 8 節。
 
 ---
 

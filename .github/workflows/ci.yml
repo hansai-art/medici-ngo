@@ -1,10 +1,19 @@
-# PR 的機器守門。這裡紅燈就 merge 不進去。
+# 機器守門 + 部署。這裡紅燈就 merge 不進去，也不會有預覽網址。
 #
 # 為什麼每一關都要跑：這個 repo 收的是外部創作者的 markdown，
 # 審稿的人用眼睛看一定會漏。所有規則都必須是機器擋的，靠自律的規則會在下一份稿子回歸。
 #
-# 這一份跟 Cloudflare Pages 的自動建置是兩回事：
-# Pages 負責產出預覽網址給人看畫面，這裡負責擋不合格的內容。兩邊都要綠。
+# 為什麼建置放在這裡，而不是用 Cloudflare Pages 的 Git 整合：
+#
+# 1. Pages 的 Git 整合免費方案每月 500 次建置，而共編流程每個 PR 每次推送都要建一次。
+#    這個帳號的 Workers 建置額度以前就被用光過，同一個坑不想再踩。
+#    公開 repo 的 GitHub Actions 分鐘數不計費，所以建置放這裡是零成本。
+# 2. Pages 自己建的話，不管我們的檢查過沒過都會產出預覽網址。
+#    放在這裡，預覽網址只有在全部檢查通過之後才會出現：有網址 = 這份稿子是合格的。
+#
+# 部署用 wrangler 直接上傳（Pages 的 direct upload）。
+# direct upload 一樣有分支預覽網址：`--branch=pr-12` 會給 https://pr-12.medici-ngo.pages.dev
+# D1 綁定從 wrangler.toml 帶上去，不用在後台設。
 
 name: CI
 
@@ -18,10 +27,14 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write # 把預覽網址留言到 PR 上
+
 jobs:
-  verify:
+  ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -66,3 +79,82 @@ jobs:
 
       - name: SEO metadata 與 OG 圖
         run: npm run check:meta
+
+      # ── 以下是部署。全部檢查通過才會走到這裡 ──────────────────────
+
+      # 沒設密鑰的時候整個部署段跳過，而不是讓 PR 變紅燈。
+      # 檢查本身才是 PR 的守門，部署失敗不該讓創作者以為是自己稿子有問題。
+      - name: 檢查有沒有 Cloudflare 密鑰
+        id: cf
+        run: echo "ready=${{ secrets.CLOUDFLARE_API_TOKEN != '' && vars.CLOUDFLARE_ACCOUNT_ID != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: 缺密鑰的提醒
+        if: steps.cf.outputs.ready != 'true'
+        run: |
+          echo "::warning::沒有 CLOUDFLARE_API_TOKEN，跳過部署。設定方式見 docs/OPERATIONS.md 第 1 節"
+
+      - name: 部署預覽（PR）
+        if: github.event_name == 'pull_request' && steps.cf.outputs.ready == 'true'
+        id: preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler pages deploy dist \
+            --project-name=medici-ngo \
+            --branch="pr-${{ github.event.number }}" \
+            --commit-dirty=true
+          echo "url=https://pr-${{ github.event.number }}.medici-ngo.pages.dev" >> "$GITHUB_OUTPUT"
+
+      # 每個 PR 只留一則留言，後續推送就地更新，不洗版
+      - name: 把預覽網址留言到 PR
+        if: github.event_name == 'pull_request' && steps.cf.outputs.ready == 'true'
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        with:
+          script: |
+            const marker = '<!-- medici-preview -->';
+            const body = [
+              marker,
+              '### 預覽網址',
+              '',
+              `${process.env.PREVIEW_URL}`,
+              '',
+              '所有檢查都通過了，這是這份稿子實際長出來的樣子。**用手機打開看過再 merge**。',
+              '',
+              '要看的三件事：集數頁的劇本與提示詞排版、手機寬度有沒有破版、接點卡的懸念讀起來接不接得下去。',
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: context.issue.number, per_page: 100,
+            });
+            const mine = comments.find((c) => c.body?.startsWith(marker));
+            if (mine) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: mine.id, body });
+            } else {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            }
+
+      - name: 部署正式站（main）
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.cf.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler pages deploy dist \
+            --project-name=medici-ngo \
+            --branch=main \
+            --commit-dirty=true
+
+      # 部署完回頭打線上網址。這是唯一能證明「真的上去了」的檢查，
+      # wrangler 說成功不等於線上是對的。
+      - name: 線上回讀
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.cf.outputs.ready == 'true'
+        run: |
+          set -e
+          for path in / /ep/1 /ep/1.md /robots.txt /sitemap.xml; do
+            code=$(curl -sL --retry 5 --retry-delay 6 --retry-all-errors \
+              -o /dev/null -w '%{http_code}' "https://medici.ngo$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || { echo "::error::https://medici.ngo$path 回 $code"; exit 1; }
+          done
