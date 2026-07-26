@@ -13,8 +13,8 @@
  */
 
 import { writeFile } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import { serveDist } from './lib/static-server.mjs';
 
 const PAGES = ['/', '/ep/1', '/join', '/prompts', '/fork', '/internal/dashboard'];
 const PORT = 4398;
@@ -39,24 +39,7 @@ const ALWAYS = [
   '待接棒開放製作中已完成上線草稿發布更新載入送出中選項投票結果',
 ];
 
-function startPreview() {
-  const proc = spawn('npx', ['astro', 'preview', '--port', String(PORT)], {
-    cwd: new URL('..', import.meta.url).pathname,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('preview server 起不來')), 30_000);
-    proc.stdout.on('data', (buf) => {
-      if (String(buf).includes(String(PORT))) {
-        clearTimeout(timer);
-        resolve(proc);
-      }
-    });
-    proc.on('error', reject);
-  });
-}
-
-const server = await startPreview();
+const server = await serveDist(new URL('../dist', import.meta.url).pathname, PORT);
 const browser = await chromium.launch();
 const regular = new Set();
 const bold = new Set();
@@ -65,7 +48,7 @@ try {
   const page = await (await browser.newContext()).newPage();
 
   for (const path of PAGES) {
-    await page.goto(`http://localhost:${PORT}${path}`, { waitUntil: 'networkidle' });
+    await page.goto(`${server.url}${path}`, { waitUntil: 'networkidle' });
 
     const buckets = await page.evaluate(() => {
       const light = new Set();
@@ -94,7 +77,7 @@ try {
   }
 } finally {
   await browser.close();
-  server.kill();
+  await server.close();
 }
 
 ALWAYS.join('').split('').forEach((c) => regular.add(c));

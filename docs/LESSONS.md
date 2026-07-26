@@ -135,3 +135,21 @@
   寫成 lint 只會擋掉一堆合法的裝飾效果。
   真正抓到它的是「build 完在手機寬度截圖看一眼」這個習慣，
   這也是為什麼交付前一定要看實際畫面，不能只看檢查全綠。
+
+## K. `kill()` 殺不到孫程序，CI 上檢查跑完了卻不肯結束
+
+- **日期**：2026-07-26
+- **病徵**：本機 `npm run check:layout` 5 秒跑完。同一支在 GitHub Actions 上
+  5 頁全部印了 `✓`，然後就停在那裡，一路掛到 job timeout。
+  介面上看起來像「檢查卡住」，實際上是「檢查做完了但 process 不肯退」。
+- **根因**：腳本用 `spawn('npx', ['astro', 'preview'])` 起伺服器，收工時 `proc.kill()`。
+  殺掉的是 `npx`，真正在跑的 `astro preview` 是它的**孫程序**，殺不到。
+  孫程序繼承了同一組 stdio pipe，pipe 一直開著，node 的 event loop 就不會結束。
+  macOS 上剛好收得掉，Linux 上收不掉：**這種平台差異在本機永遠測不出來**。
+- **正解**：檢查腳本不要起子程序。改成行程內的 `node:http` 靜態伺服器
+  （`scripts/lib/static-server.mjs`），`close()` 就真的關掉了。順便從 10 秒降到 5 秒。
+  路徑對應要跟 `astro.config.mjs` 對齊：`build.format: 'file'` 所以 `/ep/1` 對到 `dist/ep/1.html`。
+- **機器檢查**：CI 本身。job 有 `timeout-minutes: 20`，掛住會紅燈而不是無限等。
+  已反向驗證換掉之後的 404 偵測仍然有效（在 dist 塞一個不存在的 css 連結會被抓到）。
+- **推論**：**「本機會過」不是通過**。凡是牽涉子程序、訊號、檔案路徑大小寫的東西，
+  第一次在 CI 上跑之前都不算驗證過。

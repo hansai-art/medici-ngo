@@ -1,7 +1,7 @@
 /**
  * 版面守門：對 build 產物跑真實瀏覽器，擋掉三類看不見的破版。
  *
- * 跑法：npm run check:layout（會自己起 preview server，跑完關掉）
+ * 跑法：npm run check:layout（會自己起靜態伺服器跑 dist，跑完關掉）
  *
  * 檢查項目與各自的來由：
  * 1. 橫向溢出 —— 手機上一旦出現就整頁能左右晃，是最常見也最難靠肉眼發現的破版。
@@ -12,8 +12,8 @@
  * 這是機器防線，NEVER 改成只印警告了事。要放行單一例外請加進 ALLOW，寫明原因。
  */
 
-import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import { serveDist } from './lib/static-server.mjs';
 
 const PAGES = ['/', '/ep/1', '/join', '/prompts', '/fork'];
 
@@ -35,24 +35,7 @@ const KNOWN_MISSING = [
   '/fonts/noto-serif-tc-subset.woff2', // TODO: Phase 4 自架字體子集
 ];
 
-function startPreview() {
-  const proc = spawn('npx', ['astro', 'preview', '--port', '4399'], {
-    cwd: new URL('..', import.meta.url).pathname,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('preview server 起不來')), 30_000);
-    proc.stdout.on('data', (buf) => {
-      if (String(buf).includes('4399')) {
-        clearTimeout(timer);
-        resolve(proc);
-      }
-    });
-    proc.on('error', reject);
-  });
-}
-
-const server = await startPreview();
+const server = await serveDist(new URL('../dist', import.meta.url).pathname, 4399);
 const browser = await chromium.launch();
 const failures = [];
 
@@ -68,7 +51,7 @@ try {
       if (r.status() >= 400) missing.push(new URL(r.url()).pathname);
     });
 
-    const res = await page.goto(`http://localhost:4399${path}`, { waitUntil: 'networkidle' });
+    const res = await page.goto(`${server.url}${path}`, { waitUntil: 'networkidle' });
     if (res?.status() !== 200) failures.push(`${path} HTTP ${res?.status()}`);
 
     const report = await page.evaluate(
@@ -152,7 +135,7 @@ try {
   }
 } finally {
   await browser.close();
-  server.kill();
+  await server.close();
 }
 
 if (failures.length) {
