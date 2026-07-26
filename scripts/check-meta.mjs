@@ -12,6 +12,13 @@
  * 3. og:image 沒有版本號 —— 換了圖 LINE 會一直拿舊快取，你會以為沒生效。
  * 4. canonical 不是絕對網址或指到別的網域 —— 直接影響收錄。
  * 5. title 或 description 空的 —— 搜尋結果會由引擎自己編。
+ * 6. canonical 指的不是這一頁對外的網址 —— 2026-07-26 踩過：
+ *    build.format 是 'file'，所以 Astro.url.pathname 是 /join.html，
+ *    canonical 就寫成 https://medici.ngo/join.html，
+ *    但 sitemap 送出去的是 https://medici.ngo/join。
+ *    兩個網址內容一模一樣，等於自己跟自己搶收錄，
+ *    而且首頁最慘：canonical 說正本是 /index.html，不是 /。
+ *    這種錯用眼睛看 head 看不出來，因為每一項單獨看都是對的。
  */
 
 import { readdir, readFile, access } from 'node:fs/promises';
@@ -31,6 +38,19 @@ async function* walk(dir) {
 
 const pick = (html, re) => html.match(re)?.[1] ?? null;
 
+/**
+ * dist 裡的檔案路徑 → 這一頁對外的正規路徑。
+ * 這裡的規則必須跟 sitemap.xml.ts 送出去的路徑一致，
+ * 兩邊對不上就是「同一份內容有兩個網址」。
+ */
+function publicPath(distRelative) {
+  const p = distRelative.replace(/\\/g, '/');
+  if (p === '/index.html') return '/';
+  if (p.endsWith('/index.html')) return p.slice(0, -'/index.html'.length);
+  if (p.endsWith('.html')) return p.slice(0, -'.html'.length);
+  return p;
+}
+
 const failures = [];
 let pages = 0;
 
@@ -49,10 +69,24 @@ for await (const path of walk(DIST)) {
   if (!description?.trim()) failures.push(`${page} 沒有 description`);
   if (!ogTitle?.trim()) failures.push(`${page} 沒有 og:title`);
 
+  const expected = `${ORIGIN}${publicPath(page)}`;
+
   if (!canonical) {
     failures.push(`${page} 沒有 canonical`);
   } else if (!canonical.startsWith(ORIGIN)) {
     failures.push(`${page} canonical 不是本站絕對網址：${canonical}`);
+  } else if (canonical !== expected) {
+    failures.push(
+      `${page} canonical 指到別的網址：寫的是 ${canonical}，` +
+        `對外的網址是 ${expected}（sitemap 送出去的也是這個）`,
+    );
+  }
+
+  // og:url 跟 canonical 講不一樣的話，社群平台收的是 og:url，搜尋引擎收 canonical，
+  // 兩邊統計會分家，而且分享出去的連結不是正本。
+  const ogUrl = pick(html, /<meta property="og:url" content="([^"]*)"/);
+  if (ogUrl && canonical && ogUrl !== canonical) {
+    failures.push(`${page} og:url 和 canonical 不一致：${ogUrl} / ${canonical}`);
   }
 
   if (!ogImage) {

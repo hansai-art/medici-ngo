@@ -86,6 +86,9 @@ jobs:
       - name: SEO metadata 與 OG 圖
         run: npm run check:meta
 
+      - name: 轉址規則（來源不准寫完整網址）
+        run: npm run check:redirects
+
       # ── 以下是部署。全部檢查通過才會走到這裡 ──────────────────────
 
       # 沒設密鑰的時候整個部署段跳過，而不是讓 PR 變紅燈。
@@ -164,3 +167,16 @@ jobs:
             echo "$path -> $code"
             [ "$code" = "200" ] || { echo "::error::https://medici.ngo$path 回 $code"; exit 1; }
           done
+
+          # www 必須 301 到主網域。這條轉址不在 repo 裡（是 Cloudflare zone 的
+          # Redirect Rule），所以只有打線上才知道它還在不在。
+          # 2026-07-26 踩過：規則寫在 _redirects，Pages 靜默忽略，
+          # 兩個網域各自服務同一份內容，搜尋引擎看到的是兩個站。
+          # 不跟隨轉址，因為要驗的就是「有沒有轉」跟「轉去哪」。
+          www_code=$(curl -s --retry 5 --retry-delay 6 --retry-all-errors \
+            -o /dev/null -w '%{http_code}' "https://www.medici.ngo/ep/1")
+          www_to=$(curl -s -o /dev/null -w '%{redirect_url}' "https://www.medici.ngo/ep/1")
+          echo "www/ep/1 -> $www_code $www_to"
+          [ "$www_code" = "301" ] || { echo "::error::www 沒有 301（回 $www_code）"; exit 1; }
+          [ "$www_to" = "https://medici.ngo/ep/1" ] || {
+            echo "::error::www 轉到的不是主網域對應路徑：$www_to"; exit 1; }

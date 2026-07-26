@@ -24,8 +24,23 @@ const {
   noindex = false,
 } = Astro.props;
 
+/**
+ * build.format 是 'file'，所以 Astro.url.pathname 會帶副檔名：
+ * 首頁是 /index.html，/join 是 /join.html。
+ * 但 sitemap、站內連結、對外分享用的都是無副檔名的路徑。
+ * 直接拿 pathname 當 canonical 的話，等於告訴搜尋引擎正本是 /index.html，
+ * 而 sitemap 又送 /：同一份內容兩個網址，自己跟自己搶收錄。
+ * 正規化放這裡而不是叫每一頁自己傳 canonical，是因為漏傳不會有任何徵兆。
+ */
+function toPublicPath(pathname: string): string {
+  if (pathname === '/index.html') return '/';
+  if (pathname.endsWith('/index.html')) return pathname.slice(0, -'/index.html'.length);
+  if (pathname.endsWith('.html')) return pathname.slice(0, -'.html'.length);
+  return pathname;
+}
+
 // canonical 一律用 site 設定組，不用 Astro.url.href（會帶到預覽網域）
-const canonicalURL = canonical ?? new URL(Astro.url.pathname, SITE.url).href;
+const canonicalURL = canonical ?? new URL(toPublicPath(Astro.url.pathname), SITE.url).href;
 const ogImageURL = new URL(ogImage, SITE.url).href;
 const fullTitle = title === SITE.name ? title : `${title}｜${SITE.name}`;
 ---

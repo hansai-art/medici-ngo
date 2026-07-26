@@ -15,7 +15,7 @@
     "test": "node --test scripts/*.test.mjs",
     "check:layout": "node scripts/check-layout.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "verify": "npm run lint && npm run test && npm run check && npm run check:functions && npm run build && npm run check:layout && npm run check:font && npm run check:meta",
+    "verify": "npm run lint && npm run test && npm run check && npm run check:functions && npm run build && npm run check:layout && npm run check:font && npm run check:meta && npm run check:redirects",
     "check:functions": "tsc -p functions/tsconfig.json",
     "dev:api": "wrangler pages dev dist --d1=DB",
     "db:init": "wrangler d1 execute medici-ngo --local --file=./schema.sql",
@@ -24,7 +24,8 @@
     "check:font": "node scripts/check-font-coverage.mjs",
     "og:build": "node scripts/build-og.mjs",
     "seo:indexnow": "node scripts/indexnow.mjs",
-    "check:meta": "node scripts/check-meta.mjs"
+    "check:meta": "node scripts/check-meta.mjs",
+    "check:redirects": "node scripts/check-redirects.mjs"
   },
   "dependencies": {
     "astro": "^6.4.8"

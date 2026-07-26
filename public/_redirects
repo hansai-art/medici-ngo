@@ -1,9 +1,17 @@
 # Cloudflare Pages 轉址規則。一行一條，先命中的先套用。
 #
-# www 一律 301 到主網域。兩個網域都指到同一份內容而不轉址的話，
-# 搜尋引擎會看到兩份一模一樣的站，權重被拆成兩半。
-# canonical 標籤只是「建議」，301 才是「規定」。
+# 這裡只能寫「路徑」，不能寫完整網址。
 #
-# 用完整網址當來源是 Pages 支援的寫法，這樣才能依主機名分流
-# （只寫路徑的話兩個網域都會套到）。
-https://www.medici.ngo/* https://medici.ngo/:splat 301
+# www 到主網域的 301 曾經寫在這裡：
+#
+#   https://www.medici.ngo/* https://medici.ngo/:splat 301
+#
+# 它一行都沒生效，而且沒有任何錯誤訊息：Pages 明文不支援 domain-level
+# redirect（官方文件的「Domain-level redirects」段落把這種寫法列為不支援），
+# 遇到就整條忽略。線上實測 https://www.medici.ngo/ 回的是 200 不是 301。
+#
+# www 的轉址改在 Cloudflare zone 的 Redirect Rules 做（proxy 層，在 Pages 之前執行）：
+#   規則名稱 www to apex / 條件 http.host eq "www.medici.ngo"
+#   動態 concat("https://medici.ngo", http.request.uri.path) / 301 / 保留查詢字串
+#
+# 這個檔案要是又出現完整網址開頭的規則，scripts/check-redirects.mjs 會擋下來。

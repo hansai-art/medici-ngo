@@ -226,3 +226,50 @@
 - **副產物**：`--status-fiction` 原本是 5.1 : 1（9px 的小字），一起被抓出來修掉。
 - **推論**：任何「看起來還好」的視覺判斷，只要能算，就該算。
   算得出來的東西不要投票。
+
+## O. 兩個「單獨看都對」的設定，湊起來就是自己跟自己搶收錄
+
+- **日期**：2026-07-26
+- **病徵**：切網域之後回讀線上 HTML，首頁的 canonical 是
+  `https://medici.ngo/index.html`，但 sitemap 送出去的是 `https://medici.ngo/`。
+  `/join`、`/prompts`、`/fork`、`/internal/dashboard` 同樣多一截 `.html`。
+- **根因**：`astro.config.mjs` 的 `build.format` 是 `'file'`，
+  所以 `Astro.url.pathname` 會帶副檔名。`BaseHead.astro` 直接拿它組 canonical。
+  `/ep/[n]` 沒事，因為那一頁自己傳了 canonical，
+  也正因為它沒事，看起來更像「canonical 這件事已經處理好了」。
+  兩邊各自看都是對的：canonical 是絕對網址、指向本站、頁面也真的存在；
+  sitemap 也沒錯。錯的是它們指到兩個不同的網址，
+  而搜尋引擎收到的是「同一份內容有兩個正本」。
+- **正解**：正規化收在 `BaseHead.astro`（`/index.html` → `/`、去掉 `.html`），
+  不是叫每一頁自己傳 canonical。漏傳沒有任何徵兆，
+  而預設值錯的時候，所有沒傳的頁面一起錯。
+- **機器檢查**：`scripts/check-meta.mjs` 從 dist 的檔案路徑推出「這一頁對外的網址」，
+  canonical 必須完全等於它（規則跟 `sitemap.xml.ts` 同一套），
+  順便擋 og:url 與 canonical 不一致。
+  已反向驗證：修之前跑會紅 5 頁（比肉眼多抓到內部儀表板），修完綠。
+- **推論**：檢查「這個值長得對不對」不夠，要檢查「這個值跟另一份文件講的是不是同一件事」。
+  單點驗證抓不到互相矛盾。
+
+## P. Pages 的 `_redirects` 會靜默吃掉不支援的規則
+
+- **日期**：2026-07-26
+- **病徵**：`public/_redirects` 裡的
+  `https://www.medici.ngo/* https://medici.ngo/:splat 301` 一行都沒生效，
+  線上 `https://www.medici.ngo/` 回 200 而不是 301，
+  兩個網域各自服務同一份內容。
+- **根因**：Cloudflare Pages 的 `_redirects` 來源欄只吃路徑，
+  官方文件把 domain-level redirect 明列為不支援。
+  遇到不支援的規則它不報錯、不警告，build 照樣綠，就只是忽略。
+  檔案本身讀起來完全合理，連註解都寫得振振有詞（那條註解是我寫的，而且是錯的）。
+- **正解**：跨網域轉址搬到 Cloudflare zone 的 Redirect Rules（proxy 層，Pages 之前執行）：
+  `https://www.medici.ngo/*` → `https://medici.ngo/${1}`，301，勾保留查詢字串。
+  這條規則不在 repo 裡，所以它是否還活著只有打線上才知道。
+- **機器檢查**：兩道。
+  - `scripts/check-redirects.mjs`：`_redirects` 的來源欄出現完整網址就擋，
+    直接在錯誤訊息裡說「要去 zone 的 Redirect Rules 設」。已反向驗證。
+  - CI 的「線上回讀」加驗 `https://www.medici.ngo/ep/1` 必須回 301
+    且 `Location` 正好是 `https://medici.ngo/ep/1`。
+    設定在 dashboard、不在版控裡的東西，只能用線上回讀當防線。
+- **推論**：「寫了但被忽略」比「寫錯被擋下」危險得多，
+  因為前者會留下一份看起來已經處理好的證據。
+  平台的支援範圍要查文件，不能靠讀起來合不合理。
