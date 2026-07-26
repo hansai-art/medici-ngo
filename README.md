@@ -64,7 +64,7 @@ npm run verify
 | `npm run db:init` | 建本機 D1 的表 |
 | `npm run seo:indexnow` | 內容真的有變動之後才送，NEVER 每次部署都送 |
 
-`font:build` 與 `og:build` 需要 Noto Serif TC 原檔，取得方式見
+`font:build` 與 `og:build` 需要 Noto Sans TC（思源黑體）原檔，取得方式見
 [docs/OPERATIONS.md](docs/OPERATIONS.md) 第 8 節。
 
 ---

@@ -53,6 +53,9 @@ jobs:
       - name: 設計 token
         run: npm run lint:design
 
+      - name: 文字對比（深色底不准配灰字）
+        run: npm run check:contrast
+
       - name: 單元測試
         run: npm run test
 
@@ -71,7 +74,7 @@ jobs:
       - name: 安裝 Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: 版面（手機寬度、貼邊、溢出）
+      - name: 版面（手機 + 桌機：貼邊、溢出、桌機空曠）
         run: npm run check:layout
 
       - name: 字型子集缺字

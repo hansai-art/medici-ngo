@@ -23,31 +23,37 @@
 }
 
 /* ── 字型 ───────────────────────────────────────────
-   自架 Noto Serif TC 子集（SIL Open Font License 1.1），
-   由 scripts/subset-font.py 產生，只含站上真正用到的字：
-   Regular 963 字 234 KB、Bold 48 字 13 KB（原檔各 7.6 MB）。
+   自架 Noto Sans TC（思源黑體）子集（SIL Open Font License 1.1），
+   由 scripts/subset-font.py 產生，只含站上真正用到的字（原檔各 5.7 MB）。
+   實際字數與檔案大小以 public/fonts/coverage.json 與 build 輸出為準，
+   註解裡不寫死數字：寫死一定會過期，之前那兩個數字就已經是錯的。
 
    不打 Google Fonts：第三方字型請求多一次 DNS + TLS，直接壓在 LCP 上，
    而 Core Web Vitals 是排名因素。
 
-   font-display: swap —— 先用系統襯線把字顯示出來，字型載完再換。
+   font-display: swap —— 先用系統字把字顯示出來，字型載完再換。
    中文字型再怎麼切都是幾百 KB，用 block 會讓使用者盯著空白頁。
+   2026-07-26 從襯線換成黑體之後這一段的風險小很多：
+   後備字型（PingFang TC / 微軟正黑）跟 Noto Sans TC 是同一類長相，
+   換字的瞬間不會整頁跳動，子集萬一漏字也不會變成完全不同的東西。
 
    ⚠️ 加了新內容就要重跑 npm run font:build，不然新字會掉回系統字型。
    忘了跑會被 npm run check:font 擋下來。 */
 @font-face {
-  font-family: 'Noto Serif TC';
-  src: url('/fonts/noto-serif-tc-regular.woff2') format('woff2');
+  font-family: 'Noto Sans TC';
+  src: url('/fonts/noto-sans-tc-regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Noto Serif TC';
-  src: url('/fonts/noto-serif-tc-bold.woff2') format('woff2');
+  font-family: 'Noto Sans TC';
+  src: url('/fonts/noto-sans-tc-bold.woff2') format('woff2');
   /* 範圍寫 600 到 900：CSS 的字重匹配會把 600 對到這個檔案，
-     不然 font-weight: 600 的標題會拿 Regular 去合成假粗體 */
+     不然 font-weight: 600 的標題會拿 Regular 去合成假粗體。
+     這個範圍跟 scripts/collect-glyphs.mjs 的 `weight >= 600` 是一對，
+     動其中一邊 MUST 同時動另一邊，否則粗體會缺字。 */
   font-weight: 600 900;
   font-style: normal;
   font-display: swap;
@@ -140,20 +146,45 @@ button {
 
 /* ── 版面共用 ────────────────────────────────────── */
 
+/* 外殼不再限制寬度。
+   舊版是 max-width 480px / 720px，於是整個站在 2000px 螢幕上變成
+   中間一條手機、兩側全黑。2026-07-26 改成 Netflix 的分工：
+
+   - **媒體滿版**：hero 與卡列吃整個視窗寬，只用 --gutter 決定內容從哪裡開始
+   - **文字自己限寬**：.measure 把行長壓在 --measure 以內。
+     留白不足難讀，但一行 1800px 更難讀，兩者是不同的問題，要用不同的工具解
+   - **.wrap** 給需要置中的一般區塊，上限 --content-max
+
+   所以「限寬」這件事從外殼下放到各個區塊，因為只有區塊自己知道
+   它是圖、是字、還是卡列。 */
 .shell {
   width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
   position: relative;
 }
 
-@media (min-width: 900px) {
-  .shell { max-width: 720px; }
+.pad {
+  padding-left: var(--edge);
+  padding-right: var(--edge);
 }
 
-.pad {
-  padding-left: var(--gutter);
-  padding-right: var(--gutter);
+/* 置中並限制最大寬度。給不吃 .pad 但需要收邊的區塊 */
+.wrap {
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+/* 文字欄。跟 .pad 是兩件不同的事：.pad 管左右留白，.measure 管一行多長 */
+.measure {
+  max-width: var(--measure);
+}
+
+/* 整頁都是文字的頁面（/join、/fork、/prompts）用這個把整份文件置中。
+   加上 --edge 是因為裡面的區塊還會各自 .pad，不加的話文字欄會被縮兩次。
+   不置中的話，1440 螢幕上會出現橫跨 1320px 的定義列：
+   眼睛從標籤掃到值要走過大半個螢幕，那不是「用到了空間」，是讀不下去。 */
+.doc {
+  max-width: calc(var(--doc) + var(--edge) * 2);
+  margin-inline: auto;
 }
 
 /* 橫向捲動列。
@@ -163,9 +194,9 @@ button {
   display: flex;
   gap: var(--sp-3);
   overflow-x: auto;
-  padding: 0 var(--gutter) var(--sp-1);
+  padding: 0 var(--edge) var(--sp-1);
   scroll-snap-type: x mandatory;
-  scroll-padding-left: var(--gutter);
+  scroll-padding-left: var(--edge);
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }

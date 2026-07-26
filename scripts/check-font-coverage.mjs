@@ -22,8 +22,12 @@ const COVERAGE = new URL('../public/fonts/coverage.json', import.meta.url).pathn
  * 那裡用的是系統介面字型，不是我們的網頁字型。把它們算進子集
  * 只會讓字型變大，而且永遠不會被用到。
  */
+/* 反向參照是 \1 不是 \2：整條式子裡只有一個括號群組。
+   寫成 \2 的時候 JS 會把它當成八進位跳脫（U+0002），
+   於是 script / style 這一段永遠比對不到，body 裡的 inline 腳本
+   會被當成正文，把不需要的字灌進子集。2026-07-26 修。 */
 const STRIP =
-  /<head\b[\s\S]*?<\/head>|<(script|style)\b[\s\S]*?<\/\2>|<!--[\s\S]*?-->|<[^>]+>/gi;
+  /<head\b[\s\S]*?<\/head>|<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->|<[^>]+>/gi;
 
 /** 只管中日韓字：西文與數字有系統字型可用，缺了也不會變豆腐 */
 const CJK = /[　-〿㐀-䶿一-鿿豈-﫿＀-￯]/;

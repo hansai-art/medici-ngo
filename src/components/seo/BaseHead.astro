@@ -17,7 +17,7 @@ interface Props {
 const {
   title,
   description,
-  ogImage = '/og/default.jpg?v=1',
+  ogImage = '/og/default.jpg?v=2',
   ogImageAlt = SITE.name,
   canonical,
   jsonLd,
@@ -67,12 +67,12 @@ const fullTitle = title === SITE.name ? title : `${title}｜${SITE.name}`;
   第三方字型請求會拖慢 LCP，而 Core Web Vitals 是排名因素，
   這跟「衝排行榜」的目標直接衝突。
 
-  只 preload Regular：Bold 只有 13 KB 且只用在標題，
+  只 preload Regular：Bold 檔案小很多而且只用在標題，
   兩個都 preload 會跟首屏圖片搶頻寬。
 -->
 <link
   rel="preload"
-  href="/fonts/noto-serif-tc-regular.woff2"
+  href="/fonts/noto-sans-tc-regular.woff2"
   as="font"
   type="font/woff2"
   crossorigin

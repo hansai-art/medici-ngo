@@ -140,12 +140,12 @@ npx wrangler d1 execute medici-ngo --remote \
 ## 8. 素材重建（字型與 OG 圖）
 
 字型子集與 OG 圖是產生出來的檔案，不是手工做的。兩者都需要完整的
-Noto Serif TC 原檔（各 7.6 MB，SIL Open Font License 1.1，不進版控）：
+Noto Sans TC（思源黑體）原檔（各約 5.7 MB，SIL Open Font License 1.1，不進版控）：
 
 ```bash
 mkdir -p _fonts && cd _fonts
-curl -LO https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/TC/NotoSerifTC-Regular.otf
-curl -LO https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/TC/NotoSerifTC-Bold.otf
+curl -LO https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/TC/NotoSansTC-Regular.otf
+curl -LO https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/TC/NotoSansTC-Bold.otf
 ```
 
 放別的位置就設 `NOTO_SRC=/path/to/fonts`。子集需要 `pip3 install fonttools brotli`。

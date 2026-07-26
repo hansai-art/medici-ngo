@@ -16,14 +16,21 @@
   --bg-warm: var(--c-ink-600);
   --bg-inset: #000;
 
-  /* 文字 */
-  --text-primary: var(--c-parchment-100);
-  --text-secondary: var(--c-parchment-500);
-  --text-faint: var(--c-parchment-700);
-  --text-accent: var(--c-gold-400);
-  --text-on-accent: var(--c-ink-900);
-  --text-on-image: rgba(233, 225, 210, 0.82);  /* 壓在海報上的說明文字 */
-  --text-code: rgba(233, 225, 210, 0.78);      /* 提示詞區塊的等寬內文 */
+  /* 文字：只有三階，而且三階都必須在 --bg-page 上有 7:1 以上的對比。
+     這是 Netflix 的做法，也是 2026-07-26 的教訓：原本的 --text-faint 只有 2.7:1，
+     「美第奇 AI 學院 出品」「SEASON 1」這些字在螢幕上根本讀不到。
+     深色底不是把字調暗的許可證，是相反：底越暗，字越要亮才站得出來。
+     新增 token MUST 過 `npm run check:contrast`，低於 7:1 直接擋。 */
+  --text-primary: var(--c-parchment-100);    /* 15.2 : 1 */
+  --text-secondary: var(--c-parchment-300);  /* 10.8 : 1 */
+  --text-faint: var(--c-parchment-400);      /*  7.9 : 1 這是最暗的字，沒有更暗的了 */
+  --text-accent: var(--c-gold-400);          /* 10.8 : 1 */
+  --text-on-accent: var(--c-ink-900);        /* 金底上的深字，6.4 : 1 */
+  /* 壓在海報上的字一律用實色，NEVER 加 alpha：
+     alpha 的實際對比取決於底下那張畫的哪一塊，算不出來也保證不了。
+     要讓字浮出來就加 --text-shadow-*，不是把字調淡。 */
+  --text-on-image: var(--c-parchment-100);
+  --text-code: var(--c-parchment-300);       /* 提示詞區塊的等寬內文 */
 
   /* 影像上的文字陰影：沒有這個，遇到亮的海報字就消失了。
      三階只差在擴散半徑，顏色一律純黑。 */
@@ -65,18 +72,50 @@
 
   /* 狀態 */
   --status-open: var(--c-gold-400);      /* 開放接棒 */
-  --status-wip: var(--c-parchment-500);  /* 製作中 */
-  --status-fiction: var(--c-clay-400);   /* 戲劇虛構標記 */
+  --status-wip: var(--c-parchment-300);  /* 製作中 */
+  --status-fiction: var(--c-clay-300);   /* 戲劇虛構標記，7.3 : 1 */
 
-  /* 字型
-     中文襯線用 Noto Serif TC（自架子集，不打 Google Fonts，避免第三方請求拖慢 LCP）。
-     mono 用系統字，提示詞區塊要的是等寬與可讀，不需要特殊字型。 */
-  --font-display: 'Noto Serif TC', 'Songti TC', Georgia, serif;
-  --font-body: 'Noto Serif TC', 'Songti TC', Georgia, serif;
-  --font-ui: 'Optima', -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif;
+  /* 字型：全站一套思源黑體（Noto Sans TC），自架子集。
+     2026-07-26 從 Noto Serif TC 換過來，理由是後備字型的穩定度：
+     子集一旦漏字，黑體掉到 PingFang / 微軟正黑 還是黑體，
+     襯線掉下去在不同系統會變成完全不同的東西，而且很多裝置根本沒有中文襯線。
+     Netflix 也是整站一套無襯線，不靠字型家族做層級，靠字重與大小。
+
+     display 與 body 現在是同一套，保留兩個 token 是為了將來要分家時
+     頁面不用一個一個改。ui 也收斂成同一套：多一種字型只是多一種不一致。
+     mono 維持系統等寬，提示詞區塊要的是對齊與可複製，不是造型。 */
+  --font-display: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --font-body: var(--font-display);
+  --font-ui: var(--font-display);
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  /* 版面 */
-  --gutter: var(--sp-5);
+  /* 版面
+     gutter 隨螢幕長大：手機 20px，桌機最多 72px。
+     這是「桌機版不要看起來像放大的手機」的第一步，
+     因為滿版的區塊（hero、卡列）靠它決定內容從哪裡開始。
+     measure 是文字欄的最大寬度，跟 gutter 無關：
+     欄寬失控的長行比留白不足更難讀。 */
+  --gutter: clamp(20px, 4.2vw, 72px);
   --measure: 34rem;
+
+  /* 文件頁（/join、/fork、/prompts）的欄寬。
+     比 --measure 寬，因為那幾頁不是純段落：裡面有定義列、編號清單、
+     等寬的提示詞區塊，用 34rem 會讓每一列都在折行。
+     純段落還是該用 --measure。 */
+  --doc: 44rem;
+
+  /* 內容區的最大寬度。超寬螢幕上卡列不該無限延伸，
+     但這個值遠大於舊的 720px shell，桌機才有東西可看。 */
+  --content-max: 1600px;
+
+  /* 內容的左右起始線。--gutter 是下限，超寬螢幕改用「置中剩下的一半」，
+     這樣卡列（滿版捲動）與標題（一般區塊）會對齊同一條線，
+     不需要各自算一次，也不會在 1920 以上出現標題貼左、卡列貼更左的錯位。
+     ⚠️ scripts/check-layout.mjs 的 GUTTER 常數是這個值在 390px 下的結果（20），
+     動 --gutter 的下限 MUST 同時動那支。 */
+  --edge: max(var(--gutter), (100vw - var(--content-max)) / 2);
+
+  /* 劇集卡寬度。手機維持 132px（一屏看得到兩張半，這是刻意的「還有更多」暗示），
+     桌機長到 208px，海報上的臉才看得出是誰。 */
+  --card-w: clamp(132px, 12vw, 208px);
 }

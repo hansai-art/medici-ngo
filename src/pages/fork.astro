@@ -35,152 +35,155 @@ const jsonLd = buildGraph([
 <BaseLayout
   title="自己開一條"
   description={`${SITE.name}的接龍格式與網站骨架全部開源。60 秒一集、三件套交付、接點卡傳棒，這套協定可以被自由複製到任何題材。`}
-  ogImage="/og/fork.jpg?v=1"
+  ogImage="/og/fork.jpg?v=2"
   ogImageAlt="自己開一條接龍"
   jsonLd={jsonLd}
 >
-  <header class="head pad">
-    <p class="kicker">自己開一條 <span class="bi-en">Fork the relay</span></p>
-    <h1>這套格式不屬於我們</h1>
-    <p class="lede">
-      文藝復興不是一家公司做出來的。同樣的，接龍也不該只有一條。
-      這一頁告訴你怎麼把整套格式搬去做你自己的題材。
-    </p>
-  </header>
+  <!-- 桌機上把整份文件收成一欄置中：不收的話定義列會橫跨整個螢幕 -->
+  <div class="doc">
+    <header class="head pad">
+      <p class="kicker">自己開一條 <span class="bi-en">Fork the relay</span></p>
+      <h1>這套格式不屬於我們</h1>
+      <p class="lede">
+        文藝復興不是一家公司做出來的。同樣的，接龍也不該只有一條。
+        這一頁告訴你怎麼把整套格式搬去做你自己的題材。
+      </p>
+    </header>
 
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">01</span><h2>接龍協定</h2>
-      <span class="bi-en">The protocol</span>
-    </div>
-    <p class="pad fine">
-      這五條是接龍能運作的最小規則。題材、風格、語言都可以換，這五條換掉就不是接龍了。
-    </p>
-    <ol class="protocol pad">
-      <li>
-        <p class="p-t">每集有長度上限</p>
-        <p class="p-b">我們用 60 秒。上限是什麼不重要，重要的是有上限，逼創作者把力氣花在鉤子上。</p>
-      </li>
-      <li>
-        <p class="p-t">配方跟成品一起交</p>
-        <p class="p-b">影片、完整劇本與提示詞、接點卡，三件套缺一不可。不公開配方的接龍只是連載。</p>
-      </li>
-      <li>
-        <p class="p-t">結尾必須斷在猜不到的地方</p>
-        <p class="p-b">最後 5 秒丟新鉤子。能被一句話猜中下一集開頭，就要重寫結尾。</p>
-      </li>
-      <li>
-        <p class="p-t">接點卡限制下一棒，但不決定內容</p>
-        <p class="p-b">給 3 個必守設定加 1 個懸念。必守防止世界觀崩掉，懸念留給下一棒自由發揮。</p>
-      </li>
-      <li>
-        <p class="p-t">有人終審</p>
-        <p class="p-b">完全沒有守門的接龍會在第三集散掉。要有一個人可以說「這集退回重修」。</p>
-      </li>
-    </ol>
-  </section>
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">01</span><h2>接龍協定</h2>
+        <span class="bi-en">The protocol</span>
+      </div>
+      <p class="pad fine">
+        這五條是接龍能運作的最小規則。題材、風格、語言都可以換，這五條換掉就不是接龍了。
+      </p>
+      <ol class="protocol pad">
+        <li>
+          <p class="p-t">每集有長度上限</p>
+          <p class="p-b">我們用 60 秒。上限是什麼不重要，重要的是有上限，逼創作者把力氣花在鉤子上。</p>
+        </li>
+        <li>
+          <p class="p-t">配方跟成品一起交</p>
+          <p class="p-b">影片、完整劇本與提示詞、接點卡，三件套缺一不可。不公開配方的接龍只是連載。</p>
+        </li>
+        <li>
+          <p class="p-t">結尾必須斷在猜不到的地方</p>
+          <p class="p-b">最後 5 秒丟新鉤子。能被一句話猜中下一集開頭，就要重寫結尾。</p>
+        </li>
+        <li>
+          <p class="p-t">接點卡限制下一棒，但不決定內容</p>
+          <p class="p-b">給 3 個必守設定加 1 個懸念。必守防止世界觀崩掉，懸念留給下一棒自由發揮。</p>
+        </li>
+        <li>
+          <p class="p-t">有人終審</p>
+          <p class="p-b">完全沒有守門的接龍會在第三集散掉。要有一個人可以說「這集退回重修」。</p>
+        </li>
+      </ol>
+    </section>
 
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">02</span><h2>怎麼開始</h2>
-      <span class="bi-en">Getting started</span>
-    </div>
-    <ol class="steps pad">
-      <li>
-        <p class="step-t">決定你的時空錨與唯一規則</p>
-        <p class="step-b">
-          我們的時空錨是文藝復興的義大利，唯一規則是「把想像描述得夠精確，它就會短暫成真」。
-          你需要的是同樣結構的一組：一個明確的世界，加一條所有人都要遵守的特殊規則。
-        </p>
-      </li>
-      <li>
-        <p class="step-t">自己做第 1 集</p>
-        <p class="step-b">
-          第 1 集必須由發起人做。你要先示範這個格式長什麼樣子、品質標準在哪裡，
-          別人才知道要接什麼。第 1 集免解上鉤，但一樣要留鉤子。
-        </p>
-      </li>
-      <li>
-        <p class="step-t">把網站骨架 clone 下來</p>
-        <p class="step-b">
-          內容格式定義、自動檢查腳本、部署設定都在裡面。
-          換掉內容檔與品牌字串就是你自己的站。
-        </p>
-      </li>
-      <li>
-        <p class="step-t">邀請第一批接棒者</p>
-        <p class="step-b">
-          從你認識、你信任的人開始。開放給所有人是第二步，
-          不是第一步：接龍的品質基準是靠前三集立起來的。
-        </p>
-      </li>
-    </ol>
-
-    <div class="pad">
-      {
-        EXTERNAL.repo ? (
-          <a class="repo" href={EXTERNAL.repo} rel="noopener">
-            取得網站骨架
-          </a>
-        ) : (
-          <p class="repo repo--pending">
-            開源 repo 整理中。在那之前，這一頁的協定就是全部你需要的東西，
-            拿去用不必等我們。
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">02</span><h2>怎麼開始</h2>
+        <span class="bi-en">Getting started</span>
+      </div>
+      <ol class="steps pad">
+        <li>
+          <p class="step-t">決定你的時空錨與唯一規則</p>
+          <p class="step-b">
+            我們的時空錨是文藝復興的義大利，唯一規則是「把想像描述得夠精確，它就會短暫成真」。
+            你需要的是同樣結構的一組：一個明確的世界，加一條所有人都要遵守的特殊規則。
           </p>
-        )
-      }
-    </div>
-  </section>
+        </li>
+        <li>
+          <p class="step-t">自己做第 1 集</p>
+          <p class="step-b">
+            第 1 集必須由發起人做。你要先示範這個格式長什麼樣子、品質標準在哪裡，
+            別人才知道要接什麼。第 1 集免解上鉤，但一樣要留鉤子。
+          </p>
+        </li>
+        <li>
+          <p class="step-t">把網站骨架 clone 下來</p>
+          <p class="step-b">
+            內容格式定義、自動檢查腳本、部署設定都在裡面。
+            換掉內容檔與品牌字串就是你自己的站。
+          </p>
+        </li>
+        <li>
+          <p class="step-t">邀請第一批接棒者</p>
+          <p class="step-b">
+            從你認識、你信任的人開始。開放給所有人是第二步，
+            不是第一步：接龍的品質基準是靠前三集立起來的。
+          </p>
+        </li>
+      </ol>
 
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">03</span><h2>授權</h2>
-      <span class="bi-en">License</span>
-    </div>
-    <dl class="spec pad">
-      <div>
-        <dt>劇本與提示詞</dt>
-        <dd>
-          <a href={LICENSE.content.url} rel="license">{LICENSE.content.name}</a>
-          ，{LICENSE.content.summary}
-        </dd>
+      <div class="pad">
+        {
+          EXTERNAL.repo ? (
+            <a class="repo" href={EXTERNAL.repo} rel="noopener">
+              取得網站骨架
+            </a>
+          ) : (
+            <p class="repo repo--pending">
+              開源 repo 整理中。在那之前，這一頁的協定就是全部你需要的東西，
+              拿去用不必等我們。
+            </p>
+          )
+        }
       </div>
-      <div>
-        <dt>網站程式碼</dt>
-        <dd><a href={LICENSE.code.url} rel="license">{LICENSE.code.name}</a></dd>
-      </div>
-      <div><dt>影片</dt><dd>{LICENSE.video}</dd></div>
-      <div>
-        <dt>主視覺素材</dt>
-        <dd>
-          目前使用的畫作全部是公共領域或 CC0，來源明細見
-          <a href="/credits/ASSET-MANIFEST.json">素材清單</a>
-        </dd>
-      </div>
-    </dl>
-  </section>
+    </section>
 
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">04</span><h2>常見問題</h2>
-      <span class="bi-en">FAQ</span>
-    </div>
-    <div class="pad">
-      {
-        faq.map((item) => (
-          <div class="faq">
-            <h3>{item.q}</h3>
-            <p>{item.a}</p>
-          </div>
-        ))
-      }
-    </div>
-  </section>
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">03</span><h2>授權</h2>
+        <span class="bi-en">License</span>
+      </div>
+      <dl class="spec pad">
+        <div>
+          <dt>劇本與提示詞</dt>
+          <dd>
+            <a href={LICENSE.content.url} rel="license">{LICENSE.content.name}</a>
+            ，{LICENSE.content.summary}
+          </dd>
+        </div>
+        <div>
+          <dt>網站程式碼</dt>
+          <dd><a href={LICENSE.code.url} rel="license">{LICENSE.code.name}</a></dd>
+        </div>
+        <div><dt>影片</dt><dd>{LICENSE.video}</dd></div>
+        <div>
+          <dt>主視覺素材</dt>
+          <dd>
+            目前使用的畫作全部是公共領域或 CC0，來源明細見
+            <a href="/credits/ASSET-MANIFEST.json">素材清單</a>
+          </dd>
+        </div>
+      </dl>
+    </section>
 
-  <p class="pad closing">
-    目前這條接龍走到第 {episodes.length} 集。
-    如果你開了另一條，我們很想看看。
-  </p>
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">04</span><h2>常見問題</h2>
+        <span class="bi-en">FAQ</span>
+      </div>
+      <div class="pad">
+        {
+          faq.map((item) => (
+            <div class="faq">
+              <h3>{item.q}</h3>
+              <p>{item.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <p class="pad closing">
+      目前這條接龍走到第 {episodes.length} 集。
+      如果你開了另一條，我們很想看看。
+    </p>
+  </div>
 </BaseLayout>
 
 <style>

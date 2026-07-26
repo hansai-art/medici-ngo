@@ -68,165 +68,168 @@ const jsonLd = buildGraph([
 <BaseLayout
   title="提示詞庫"
   description={`${SITE.name}全部 ${total} 條 AI 影片生成提示詞完整公開，含角色錨句寫法與分鏡對照。CC BY 4.0，可自由取用改作商用。`}
-  ogImage="/og/prompts.jpg?v=1"
+  ogImage="/og/prompts.jpg?v=2"
   ogImageAlt="提示詞庫"
   jsonLd={jsonLd}
 >
-  <header class="head pad">
-    <p class="kicker">提示詞庫 <span class="bi-en">Prompt library</span></p>
-    <h1>{total} 條提示詞，全部公開</h1>
-    <p class="lede">
-      這裡沒有付費牆，沒有留 email 才給。每一條提示詞都對照得到成品的哪一鏡，
-      複製鈕會自動幫你把角色錨句接在前面。
-    </p>
-  </header>
-
-  <!-- 教學段：這是整頁真正會被搜到的內容 -->
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">01</span>
-      <h2>怎麼寫這種分鏡提示詞</h2>
-    </div>
-    <div class="pad teach">
-      <article>
-        <h3>一、先寫角色錨句，再寫每一鏡</h3>
-        <p>
-          AI 影片生成工具每一次生成都是獨立的，它不記得上一鏡的人長什麼樣子。
-          所以要先把人物長相、年紀、髮型、衣著、場景、光線、畫面比例寫成一段固定文字，
-          每一鏡的提示詞都把它放在最前面。少了這一步，15 個鏡頭會長出 15 個不同的人。
-        </p>
-      </article>
-      <article>
-        <h3>二、一鏡一條，不要把整段劇情塞進一條</h3>
-        <p>
-          一條提示詞只描述一個畫面。把「他被砸了筆、蹲下撿、然後決定畫畫」寫成一條，
-          生成出來會是三個動作混在一起的糊畫面。拆成三鏡，每鏡各一條。
-        </p>
-      </article>
-      <article>
-        <h3>三、寫看得到的東西，不要寫看不到的</h3>
-        <p>
-          「他心裡很不甘」生成不出來，「特寫他的眼睛：沒有情緒」可以。
-          把情緒翻譯成鏡頭語言與可見的動作，這是分鏡提示詞跟一般文字提示詞最大的差別。
-        </p>
-      </article>
-      <article>
-        <h3>四、不要寫秒數</h3>
-        <p>
-          寫秒數會讓工具把時間也當成畫面內容去理解，構圖反而失焦。
-          節奏交給剪輯，提示詞只負責描述這一鏡要看到什麼。
-        </p>
-      </article>
-      <article>
-        <h3>五、直式 9:16 要寫進錨句</h3>
-        <p>
-          短劇是直式的，但多數工具預設橫式。畫面比例要寫在錨句裡，每一鏡才會一致，
-          不然會拿到一半橫一半直的素材。
-        </p>
-      </article>
-    </div>
-  </section>
-
-  <!-- 全部提示詞 -->
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">02</span>
-      <h2>全部提示詞</h2>
-      <span class="bi-en">All prompts</span>
-    </div>
-
-    <div class="pad">
-      <p class="filter-note">
-        鏡頭尺寸是直接讀提示詞裡實際出現的英文詞判讀出來的（例如 extreme close-up、camera
-        pulls back），不是人工分類，也不是猜的。判讀不出來的歸在未標註。
+  <!-- 桌機上把整份文件收成一欄置中：不收的話定義列會橫跨整個螢幕 -->
+  <div class="doc">
+    <header class="head pad">
+      <p class="kicker">提示詞庫 <span class="bi-en">Prompt library</span></p>
+      <h1>{total} 條提示詞，全部公開</h1>
+      <p class="lede">
+        這裡沒有付費牆，沒有留 email 才給。每一條提示詞都對照得到成品的哪一鏡，
+        複製鈕會自動幫你把角色錨句接在前面。
       </p>
-      <div class="chips" role="group" aria-label="依鏡頭尺寸篩選">
-        <button type="button" class="chip is-on" data-filter="all">
-          全部 {rows.length}
-        </button>
-        {
-          counts.map((c) => (
-            <button type="button" class="chip" data-filter={c.size}>
-              {c.label} {c.n}
-            </button>
-          ))
-        }
+    </header>
+
+    <!-- 教學段：這是整頁真正會被搜到的內容 -->
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">01</span>
+        <h2>怎麼寫這種分鏡提示詞</h2>
       </div>
-    </div>
+      <div class="pad teach">
+        <article>
+          <h3>一、先寫角色錨句，再寫每一鏡</h3>
+          <p>
+            AI 影片生成工具每一次生成都是獨立的，它不記得上一鏡的人長什麼樣子。
+            所以要先把人物長相、年紀、髮型、衣著、場景、光線、畫面比例寫成一段固定文字，
+            每一鏡的提示詞都把它放在最前面。少了這一步，15 個鏡頭會長出 15 個不同的人。
+          </p>
+        </article>
+        <article>
+          <h3>二、一鏡一條，不要把整段劇情塞進一條</h3>
+          <p>
+            一條提示詞只描述一個畫面。把「他被砸了筆、蹲下撿、然後決定畫畫」寫成一條，
+            生成出來會是三個動作混在一起的糊畫面。拆成三鏡，每鏡各一條。
+          </p>
+        </article>
+        <article>
+          <h3>三、寫看得到的東西，不要寫看不到的</h3>
+          <p>
+            「他心裡很不甘」生成不出來，「特寫他的眼睛：沒有情緒」可以。
+            把情緒翻譯成鏡頭語言與可見的動作，這是分鏡提示詞跟一般文字提示詞最大的差別。
+          </p>
+        </article>
+        <article>
+          <h3>四、不要寫秒數</h3>
+          <p>
+            寫秒數會讓工具把時間也當成畫面內容去理解，構圖反而失焦。
+            節奏交給剪輯，提示詞只負責描述這一鏡要看到什麼。
+          </p>
+        </article>
+        <article>
+          <h3>五、直式 9:16 要寫進錨句</h3>
+          <p>
+            短劇是直式的，但多數工具預設橫式。畫面比例要寫在錨句裡，每一鏡才會一致，
+            不然會拿到一半橫一半直的素材。
+          </p>
+        </article>
+      </div>
+    </section>
 
-    {
-      episodes.map((ep) => (
-        <div class="ep-group">
-          <h3 class="ep-group-head pad">
-            <a href={`/ep/${ep.data.episode}`}>
-              第 {ep.data.episode} 集：{ep.data.title}
-            </a>
-          </h3>
+    <!-- 全部提示詞 -->
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">02</span>
+        <h2>全部提示詞</h2>
+        <span class="bi-en">All prompts</span>
+      </div>
 
-          <div class="pad">
-            <div class="specimen specimen--anchor" data-size="anchor">
-              <div class="specimen-bar">
-                <span>ANCHOR · 角色錨句</span>
-                <button
-                  type="button"
-                  class="copy"
-                  data-copy-target={`anchor-${ep.data.episode}`}
-                >
-                  複製
-                </button>
-              </div>
-              {/* pre 內的表達式必須貼齊標籤寫成一行：換行縮排會變成真的空白，
-                  畫面上是首行縮排，複製出來的提示詞也會帶著前後空白 */}
-              <pre class="specimen-body" id={`anchor-${ep.data.episode}`}>{ep.data.anchorPrompt}</pre>
-            </div>
-          </div>
-
-          {rows
-            .filter((r) => r.episode === ep.data.episode)
-            .map((r) => (
-              <div class="pad">
-                <div class="specimen" data-size={r.size}>
-                  <div class="specimen-bar">
-                    <span>
-                      鏡 {String(r.n).padStart(2, '0')} · {SHOT_SIZE_LABEL[r.size]}
-                    </span>
-                    <button
-                      type="button"
-                      class="copy"
-                      data-copy-target={`p-${r.episode}-${r.n}`}
-                      data-anchor-source={`anchor-${r.episode}`}
-                    >
-                      複製
-                    </button>
-                  </div>
-                  <pre class="specimen-body" id={`p-${r.episode}-${r.n}`}>{r.prompt}</pre>
-                </div>
-              </div>
-            ))}
+      <div class="pad">
+        <p class="filter-note">
+          鏡頭尺寸是直接讀提示詞裡實際出現的英文詞判讀出來的（例如 extreme close-up、camera
+          pulls back），不是人工分類，也不是猜的。判讀不出來的歸在未標註。
+        </p>
+        <div class="chips" role="group" aria-label="依鏡頭尺寸篩選">
+          <button type="button" class="chip is-on" data-filter="all">
+            全部 {rows.length}
+          </button>
+          {
+            counts.map((c) => (
+              <button type="button" class="chip" data-filter={c.size}>
+                {c.label} {c.n}
+              </button>
+            ))
+          }
         </div>
-      ))
-    }
-    <p class="empty pad" data-empty hidden>這個鏡頭尺寸目前沒有提示詞。</p>
-  </section>
+      </div>
 
-  <!-- FAQ -->
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">03</span>
-      <h2>常見問題</h2>
-      <span class="bi-en">FAQ</span>
-    </div>
-    <div class="pad">
       {
-        faq.map((item) => (
-          <div class="faq">
-            <h3>{item.q}</h3>
-            <p>{item.a}</p>
+        episodes.map((ep) => (
+          <div class="ep-group">
+            <h3 class="ep-group-head pad">
+              <a href={`/ep/${ep.data.episode}`}>
+                第 {ep.data.episode} 集：{ep.data.title}
+              </a>
+            </h3>
+
+            <div class="pad">
+              <div class="specimen specimen--anchor" data-size="anchor">
+                <div class="specimen-bar">
+                  <span>ANCHOR · 角色錨句</span>
+                  <button
+                    type="button"
+                    class="copy"
+                    data-copy-target={`anchor-${ep.data.episode}`}
+                  >
+                    複製
+                  </button>
+                </div>
+                {/* pre 內的表達式必須貼齊標籤寫成一行：換行縮排會變成真的空白，
+                    畫面上是首行縮排，複製出來的提示詞也會帶著前後空白 */}
+                <pre class="specimen-body" id={`anchor-${ep.data.episode}`}>{ep.data.anchorPrompt}</pre>
+              </div>
+            </div>
+
+            {rows
+              .filter((r) => r.episode === ep.data.episode)
+              .map((r) => (
+                <div class="pad">
+                  <div class="specimen" data-size={r.size}>
+                    <div class="specimen-bar">
+                      <span>
+                        鏡 {String(r.n).padStart(2, '0')} · {SHOT_SIZE_LABEL[r.size]}
+                      </span>
+                      <button
+                        type="button"
+                        class="copy"
+                        data-copy-target={`p-${r.episode}-${r.n}`}
+                        data-anchor-source={`anchor-${r.episode}`}
+                      >
+                        複製
+                      </button>
+                    </div>
+                    <pre class="specimen-body" id={`p-${r.episode}-${r.n}`}>{r.prompt}</pre>
+                  </div>
+                </div>
+              ))}
           </div>
         ))
       }
-    </div>
-  </section>
+      <p class="empty pad" data-empty hidden>這個鏡頭尺寸目前沒有提示詞。</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">03</span>
+        <h2>常見問題</h2>
+        <span class="bi-en">FAQ</span>
+      </div>
+      <div class="pad">
+        {
+          faq.map((item) => (
+            <div class="faq">
+              <h3>{item.q}</h3>
+              <p>{item.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>

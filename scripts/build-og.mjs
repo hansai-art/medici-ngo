@@ -29,12 +29,12 @@ const BACKDROP = join(ROOT, 'src', 'assets', 'stills', 'ep-01-angel.jpg');
 
 /** 完整字型（不是子集）。子集只含頁面 body 用到的字，分享圖的標題會缺字 */
 const NOTO_SRC = process.env.NOTO_SRC || join(ROOT, '_fonts');
-const FONT_REGULAR = join(NOTO_SRC, 'NotoSerifTC-Regular.otf');
-const FONT_BOLD = join(NOTO_SRC, 'NotoSerifTC-Bold.otf');
+const FONT_REGULAR = join(NOTO_SRC, 'NotoSansTC-Regular.otf');
+const FONT_BOLD = join(NOTO_SRC, 'NotoSansTC-Bold.otf');
 
 if (!existsSync(FONT_REGULAR) || !existsSync(FONT_BOLD)) {
   console.error(
-    `找不到完整字型。把 NotoSerifTC-Regular.otf 與 NotoSerifTC-Bold.otf 放進 ${NOTO_SRC}，\n` +
+    `找不到完整字型。把 NotoSansTC-Regular.otf 與 NotoSansTC-Bold.otf 放進 ${NOTO_SRC}，\n` +
       '或設 NOTO_SRC 指到它們所在的資料夾。取得方式見 docs/OPERATIONS.md。',
   );
   process.exit(1);
@@ -111,12 +111,12 @@ const template = ({ title, description }) => `<!doctype html>
 <meta charset="utf-8">
 <style>
   @font-face {
-    font-family: 'Noto Serif TC';
+    font-family: 'Noto Sans TC';
     src: url('${dataUri(regular, 'font/otf')}') format('opentype');
     font-weight: 400;
   }
   @font-face {
-    font-family: 'Noto Serif TC';
+    font-family: 'Noto Sans TC';
     src: url('${dataUri(bold, 'font/otf')}') format('opentype');
     font-weight: 700;
   }
@@ -124,7 +124,7 @@ const template = ({ title, description }) => `<!doctype html>
   body {
     width: 1200px; height: 630px; overflow: hidden;
     background: #0B0A0D;
-    font-family: 'Noto Serif TC', serif;
+    font-family: 'Noto Sans TC', sans-serif;
     color: #F2EDE4;
     position: relative;
   }

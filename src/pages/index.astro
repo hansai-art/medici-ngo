@@ -24,7 +24,7 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
 <BaseLayout
   title={SITE.name}
   description={SITE.description}
-  ogImage="/og/home.jpg?v=1"
+  ogImage="/og/home.jpg?v=2"
   ogImageAlt={`${SITE.name}：${SITE.tagline}`}
   jsonLd={jsonLd}
 >
@@ -36,17 +36,24 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     <p class="bi-en">{SITE.nameEn}</p>
   </header>
 
-  <!-- Hero：最新一集滿版海報 -->
+  <!--
+    Hero：Netflix 的 billboard。
+    手機 = 海報滿版、文字壓在下緣；桌機 = 海報靠右滿出畫面，文字在左，
+    中間用一道水平漸層接起來。桌機不切成上下兩塊，是因為 78svh 的圖
+    在 1920 螢幕上只會把人擠到摺線以下，什麼都看不到。
+  -->
   <section class="hero" aria-labelledby="hero-title">
-    <Image
-      src={latest.data.poster}
-      alt={`第 ${latest.data.episode} 集主視覺`}
-      widths={[390, 780, 1170]}
-      sizes="(min-width: 900px) 720px, 100vw"
-      loading="eager"
-      fetchpriority="high"
-      class="hero-img"
-    />
+    <div class="hero-media">
+      <Image
+        src={latest.data.poster}
+        alt={`第 ${latest.data.episode} 集主視覺`}
+        widths={[390, 780, 1170, 1600]}
+        sizes="(min-width: 1024px) 64vw, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="hero-img"
+      />
+    </div>
     <div class="hero-body pad">
       <p class="tag">
         第 {latest.data.episode} 集
@@ -92,8 +99,8 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
             <Image
               src={ep.data.poster}
               alt=""
-              widths={[132, 264]}
-              sizes="132px"
+              widths={[132, 264, 416]}
+              sizes="(min-width: 1740px) 208px, (min-width: 1100px) 12vw, 132px"
               loading="lazy"
               class="card-img"
             />
@@ -119,17 +126,19 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
 
   <!-- 起源神話 -->
   <section class="creed pad">
-    <h2>文藝復興不是一家公司做出來的</h2>
-    <p>
-      是一群人互相接棒、互相超越出來的。<br />
-      每位創作者做 60 秒，交出完整劇本與提示詞，讓下一個人接下去。
-    </p>
-    <p class="creed-stat">
-      目前 {episodes.length} 集完成，{promptCount} 條提示詞全部公開，第 {openSlot} 集開放接棒
-    </p>
-    <div class="creed-actions">
-      <a class="btn-ghost" href="/join">看接棒規則</a>
-      <a class="btn-ghost" href="/prompts">逛提示詞庫</a>
+    <div class="creed-in">
+      <h2>文藝復興不是一家公司做出來的</h2>
+      <p>
+        是一群人互相接棒、互相超越出來的。<br />
+        每位創作者做 60 秒，交出完整劇本與提示詞，讓下一個人接下去。
+      </p>
+      <p class="creed-stat">
+        目前 {episodes.length} 集完成，{promptCount} 條提示詞全部公開，第 {openSlot} 集開放接棒
+      </p>
+      <div class="creed-actions">
+        <a class="btn-ghost" href="/join">看接棒規則</a>
+        <a class="btn-ghost" href="/prompts">逛提示詞庫</a>
+      </div>
     </div>
   </section>
 
@@ -158,7 +167,7 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: var(--sp-4) var(--gutter);
+    padding: var(--sp-4) var(--edge);
   }
 
   .mark {
@@ -175,11 +184,16 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     margin: 4px 0 0;
   }
 
-  /* Hero：雙層漸層 + 暗角，讓文字在任何海報上都讀得到 */
+  /* Hero：雙層漸層 + 暗角，讓文字在任何海報上都讀得到。
+     手機版是「圖在上、字壓在下緣」的直式構圖。 */
   .hero {
     position: relative;
     min-height: 78svh;
     overflow: hidden;
+  }
+
+  .hero-media {
+    position: relative;
   }
 
   .hero-img {
@@ -190,7 +204,7 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     object-position: 50% 22%;
   }
 
-  .hero::after {
+  .hero-media::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -331,9 +345,12 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     color: var(--text-accent);
   }
 
-  /* 繼續觀看 */
+  /* 繼續觀看。
+     這是一個小控制項，不是版面區塊，所以要限寬：
+     在 1600px 的內容區裡拉一條同寬的進度條，會被誤讀成頁面分隔線。 */
   .resume {
     display: block;
+    max-width: calc(var(--measure) + var(--edge) * 2);
     margin-top: var(--sp-6);
     padding-top: var(--sp-3);
     padding-bottom: var(--sp-3);
@@ -381,7 +398,7 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
   .section-head h2 {
     margin: 0;
     font-family: var(--font-display);
-    font-size: 17px;
+    font-size: var(--fs-md);
     font-weight: 600;
     letter-spacing: 0.12em;
   }
@@ -389,12 +406,12 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
   /* 劇集卡 */
   .card {
     position: relative;
-    width: 132px;
+    width: var(--card-w);
     display: block;
   }
 
   .card-img {
-    width: 132px;
+    width: 100%;
     aspect-ratio: 2 / 3;
     object-fit: cover;
   }
@@ -412,7 +429,7 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     bottom: 30px;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 30px;
+    font-size: var(--fs-xl);
     line-height: 1;
     text-shadow: var(--text-shadow-sm);
   }
@@ -433,7 +450,7 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
 
   /* 待接棒的空格 */
   .slot {
-    width: 132px;
+    width: var(--card-w);
     aspect-ratio: 2 / 3;
     display: grid;
     place-content: center;
@@ -472,6 +489,12 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
     padding-bottom: var(--sp-6);
     text-align: center;
     background: var(--bg-warm);
+  }
+
+  /* 文字欄限寬。整段是置中的宣言，不限寬的話在寬螢幕會變成一行 1500px 的長句 */
+  .creed-in {
+    max-width: 46rem;
+    margin-inline: auto;
   }
 
   .creed h2 {
@@ -529,6 +552,97 @@ const jsonLd = buildGraph([buildOrganization(), buildWebSite()]);
   .yt .btn-primary {
     flex: 0 0 auto;
     padding: 10px 16px;
+  }
+
+  /* ── 桌機：Netflix billboard ────────────────────────
+     斷點放在 1024，是因為海報是直式 2:3：
+     再往下切成左右兩欄，圖會被裁到只剩一條，人臉就沒了。
+     1024 以下維持手機那套直式構圖，平板拿到的是滿版的圖，不是縮小的桌機版。 */
+  @media (min-width: 1024px) {
+    .hero {
+      display: grid;
+      align-items: center;
+      min-height: min(88svh, 900px);
+    }
+
+    /* 海報退到右邊並且滿出畫面右緣。
+       64% 是試出來的：再窄，直式海報會被裁成一條橫帶；
+       再寬，左邊的字就壓在人臉上。 */
+    .hero-media {
+      position: absolute;
+      inset: 0 0 0 auto;
+      width: 64%;
+    }
+
+    .hero-img {
+      height: 100%;
+      min-height: 0;
+      object-position: 50% 18%;
+    }
+
+    /* 遮罩改成水平方向：左邊實心接到頁面底色，右邊留乾淨的圖。
+       手機那組是上下漸層，兩者不能共用，因為字的位置不一樣。 */
+    .hero-media::after {
+      background:
+        linear-gradient(
+          to right,
+          var(--bg-page) 0%,
+          var(--scrim-deep) 24%,
+          var(--scrim-soft) 46%,
+          transparent 70%
+        ),
+        linear-gradient(
+          to bottom,
+          var(--scrim-edge) 0%,
+          transparent 20%,
+          transparent 52%,
+          var(--bg-page) 92%
+        );
+      /* 下緣的漸層在 92% 就要收成純色，不是 100%。
+         停在 100% 的話最後幾個 px 還帶著半透明，畫面上就是一條
+         「圖被切掉」的水平線：海報右下角剛好是最亮的布料，特別明顯。 */
+    }
+
+    /* 文字回到流內，由 grid 垂直置中 */
+    .hero-body {
+      position: relative;
+      inset: auto;
+      max-width: min(48%, 40rem);
+      padding-top: var(--sp-9);
+      padding-bottom: var(--sp-9);
+    }
+
+    .hero-hook {
+      max-width: 34ch;
+      font-size: var(--fs-base);
+    }
+
+    /* 按鈕改成內容寬。桌機上把按鈕拉到 600px 寬，
+       點擊目標沒有變好，只是看起來像沒做完的表單。 */
+    .actions {
+      gap: var(--sp-4);
+    }
+
+    .btn-primary,
+    .btn-ghost {
+      flex: 0 0 auto;
+      padding-left: 30px;
+      padding-right: 30px;
+    }
+
+    .creed-actions {
+      justify-content: center;
+    }
+
+    .section {
+      margin-top: var(--sp-9);
+    }
+
+    .creed {
+      margin-top: var(--sp-9);
+      padding-top: var(--sp-9);
+      padding-bottom: var(--sp-9);
+    }
   }
 </style>
 

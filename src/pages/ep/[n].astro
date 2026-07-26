@@ -50,7 +50,7 @@ const levelClass: Record<string, string> = {
 <BaseLayout
   title={`第 ${d.episode} 集：${d.title}`}
   description={d.hook}
-  ogImage={`/og/ep-${d.episode}.jpg?v=1`}
+  ogImage={`/og/ep-${d.episode}.jpg?v=2`}
   ogImageAlt={`第 ${d.episode} 集：${d.title}`}
   canonical={canonical}
   jsonLd={jsonLd}
@@ -65,56 +65,64 @@ const levelClass: Record<string, string> = {
     </p>
   </header>
 
-  <div class="pad">
-    <EpisodePlayer
-      episode={d.episode}
-      title={d.title}
-      videoId={d.youtube.videoId}
-      poster={d.poster}
-    />
-  </div>
-
-  <div class="pad title-block">
-    <p class="stamp">
-      第 {d.episode} 集{d.youtube.videoId ? '' : ' · 製作中'}
-    </p>
-    <h1>{d.title}</h1>
-    <p class="hook">{d.hook}</p>
-  </div>
-
-  <!-- 著錄欄：這一集的規格 -->
-  <dl class="spec pad">
-    <div><dt>時長</dt><dd>{d.youtube.durationSec ? `${d.youtube.durationSec} 秒` : '60 秒內'}</dd></div>
-    <div><dt>鏡數</dt><dd>{d.shots.length} 鏡快切</dd></div>
-    <div><dt>公式</dt><dd>{d.formulas.join('　')}</dd></div>
-    <div><dt>創作者</dt><dd>{d.creator.name}</dd></div>
-    <div>
-      <dt>使用工具</dt>
-      <dd>
-        {
-          d.tools.length
-            ? d.tools.map((t) => `${t.name} ${t.version}`).join('　')
-            : '待創作者自填'
-        }
-      </dd>
+  <!--
+    影片 + 著錄欄。桌機併成兩欄：直式影片本來就只佔畫面中間一條，
+    右邊那片空白正好放標題與規格，不用捲動就看得到這一集是什麼。
+  -->
+  <div class="file-top">
+    <div class="pad">
+      <EpisodePlayer
+        episode={d.episode}
+        title={d.title}
+        videoId={d.youtube.videoId}
+        poster={d.poster}
+      />
     </div>
-    <div>
-      <dt>公開內容</dt>
-      <dd class="hi">劇本全文　{d.shots.length} 條提示詞　接點卡　史實註</dd>
-    </div>
-  </dl>
 
-  {
-    EXTERNAL.youtubeChannel && (
-      <a class="yt-bar pad" href={EXTERNAL.youtubeChannel} rel="noopener">
-        <span>
-          <b>留言與討論都在 YouTube</b>
-          <em>訂閱頻道，接棒上片不錯過</em>
-        </span>
-        <span class="yt-go">前往頻道</span>
-      </a>
-    )
-  }
+    <div class="file-meta">
+      <div class="pad title-block">
+        <p class="stamp">
+          第 {d.episode} 集{d.youtube.videoId ? '' : ' · 製作中'}
+        </p>
+        <h1>{d.title}</h1>
+        <p class="hook">{d.hook}</p>
+      </div>
+
+      <!-- 著錄欄：這一集的規格 -->
+      <dl class="spec pad">
+        <div><dt>時長</dt><dd>{d.youtube.durationSec ? `${d.youtube.durationSec} 秒` : '60 秒內'}</dd></div>
+        <div><dt>鏡數</dt><dd>{d.shots.length} 鏡快切</dd></div>
+        <div><dt>公式</dt><dd>{d.formulas.join('　')}</dd></div>
+        <div><dt>創作者</dt><dd>{d.creator.name}</dd></div>
+        <div>
+          <dt>使用工具</dt>
+          <dd>
+            {
+              d.tools.length
+                ? d.tools.map((t) => `${t.name} ${t.version}`).join('　')
+                : '待創作者自填'
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>公開內容</dt>
+          <dd class="hi">劇本全文　{d.shots.length} 條提示詞　接點卡　史實註</dd>
+        </div>
+      </dl>
+
+      {
+        EXTERNAL.youtubeChannel && (
+          <a class="yt-bar pad" href={EXTERNAL.youtubeChannel} rel="noopener">
+            <span>
+              <b>留言與討論都在 YouTube</b>
+              <em>訂閱頻道，接棒上片不錯過</em>
+            </span>
+            <span class="yt-go">前往頻道</span>
+          </a>
+        )
+      }
+    </div>
+  </div>
 
   <!-- 分鏡與提示詞：本站唯一真的有搜尋量的內容，用完整標題結構讓它被搜到 -->
   <section class="sec" id="prompts">
@@ -173,128 +181,132 @@ const levelClass: Record<string, string> = {
     }
   </section>
 
-  {/* 站內互動：直接產生創作決策用的偏好資料。選項由每集自己定義，見 content.config.ts */}
-  {
-    d.poll && (
-      <section class="poll pad" data-poll={`ep-${d.episode}-next`}>
-        <h2>{d.poll.question}</h2>
-        <p class="poll-sub">你的選擇會直接給接棒者看到</p>
-        <div class="poll-options">
-          {d.poll.options.map((opt) => (
-            <button type="button" class="poll-opt" data-option={opt.key} aria-pressed="false">
-              <span class="poll-row">
-                <span class="poll-label">{opt.label}</span>
-                <span class="poll-count" data-count />
-              </span>
-              <span class="poll-bar">
-                <i />
-              </span>
-            </button>
-          ))}
-        </div>
-        <p class="poll-state" data-poll-state>選一個，投完才看得到大家的答案</p>
-      </section>
-    )
-  }
-
-  <!-- 史實註 -->
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">02</span>
-      <h2>史實註</h2>
-      <span class="bi-en">Historical notes</span>
-    </div>
-    <div class="pad">
-      {
-        d.historyNotes.map((h) => (
-          <div class="note">
-            <div class="note-head">
-              <span class={`note-lv ${levelClass[h.level] ?? ''}`}>{h.level}</span>
-              <h3>{h.claim}</h3>
-            </div>
-            <p>
-              {h.note}
-              {h.url && (
-                <>
-                  {' '}
-                  <a href={h.url} rel="noopener nofollow">
-                    來源
-                  </a>
-                </>
-              )}
-            </p>
-          </div>
-        ))
-      }
-    </div>
-  </section>
-
-  <!-- 接點卡 -->
-  <section class="sec">
-    <div class="sec-head pad">
-      <span class="sec-no">03</span>
-      <h2>接點卡</h2>
-      <span class="bi-en">Handoff card</span>
-    </div>
-    <dl class="spec pad">
-      {
-        d.handoffCard.musts.map((m, i) => (
-          <div>
-            <dt>必守 {i + 1}</dt>
-            <dd>{m}</dd>
-          </div>
-        ))
-      }
-      <div>
-        <dt>懸念</dt>
-        <dd class="hi">{d.handoffCard.cliffhanger}</dd>
-      </div>
-    </dl>
-
-    <div class="creator pad">
-      <div class="avatar" aria-hidden="true">頭像<br />待補</div>
-      <div>
-        <p class="creator-name">{d.creator.name}</p>
-        <p class="creator-bio">{d.creator.bio}</p>
-        {
-          d.creator.links.length > 0 && (
-            <p class="creator-links">
-              {d.creator.links.map((l) => (
-                <a href={l.url} rel="noopener">
-                  {l.label}
-                </a>
-              ))}
-            </p>
-          )
-        }
-      </div>
-    </div>
-
-    <div class="cta pad">
-      <a class="cta-primary" href="/join">我要接第 {openSlot} 棒</a>
-      <a class="cta-ghost" href={`/ep/${d.episode}.md`}>取用純文字版</a>
-    </div>
-  </section>
-
-  <nav class="pager pad" aria-label="集數導覽">
-    {prev ? <a href={`/ep/${prev.data.episode}`}>← 第 {prev.data.episode} 集</a> : <a href="/">← 回首頁</a>}
+  <!-- 剩下的都是文字，桌機收成一欄置中：讀規格不需要橫跨整個螢幕 -->
+  <div class="doc">
+    {/* 站內互動：直接產生創作決策用的偏好資料。選項由每集自己定義，見 content.config.ts */}
     {
-      next ? (
-        <a class="pager-next" href={`/ep/${next.data.episode}`}>
-          第 {next.data.episode} 集 →
-        </a>
-      ) : (
-        <a class="pager-next" href="/join">
-          接下這一棒 →
-        </a>
+      d.poll && (
+        <section class="poll pad" data-poll={`ep-${d.episode}-next`}>
+          <h2>{d.poll.question}</h2>
+          <p class="poll-sub">你的選擇會直接給接棒者看到</p>
+          <div class="poll-options">
+            {d.poll.options.map((opt) => (
+              <button type="button" class="poll-opt" data-option={opt.key} aria-pressed="false">
+                <span class="poll-row">
+                  <span class="poll-label">{opt.label}</span>
+                  <span class="poll-count" data-count />
+                </span>
+                <span class="poll-bar">
+                  <i />
+                </span>
+              </button>
+            ))}
+          </div>
+          <p class="poll-state" data-poll-state>選一個，投完才看得到大家的答案</p>
+        </section>
       )
     }
-  </nav>
 
-  <p class="credit pad">
-    主視覺：{d.posterCredit}<br />
-    本集劇本與提示詞採 {LICENSE.content.name}，{LICENSE.content.summary}。{LICENSE.video}。
-  </p>
+    <!-- 史實註 -->
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">02</span>
+        <h2>史實註</h2>
+        <span class="bi-en">Historical notes</span>
+      </div>
+      <div class="pad">
+        {
+          d.historyNotes.map((h) => (
+            <div class="note">
+              <div class="note-head">
+                <span class={`note-lv ${levelClass[h.level] ?? ''}`}>{h.level}</span>
+                <h3>{h.claim}</h3>
+              </div>
+              <p>
+                {h.note}
+                {h.url && (
+                  <>
+                    {' '}
+                    <a href={h.url} rel="noopener nofollow">
+                      來源
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- 接點卡 -->
+    <section class="sec">
+      <div class="sec-head pad">
+        <span class="sec-no">03</span>
+        <h2>接點卡</h2>
+        <span class="bi-en">Handoff card</span>
+      </div>
+      <dl class="spec pad">
+        {
+          d.handoffCard.musts.map((m, i) => (
+            <div>
+              <dt>必守 {i + 1}</dt>
+              <dd>{m}</dd>
+            </div>
+          ))
+        }
+        <div>
+          <dt>懸念</dt>
+          <dd class="hi">{d.handoffCard.cliffhanger}</dd>
+        </div>
+      </dl>
+
+      <div class="creator pad">
+        <div class="avatar" aria-hidden="true">頭像<br />待補</div>
+        <div>
+          <p class="creator-name">{d.creator.name}</p>
+          <p class="creator-bio">{d.creator.bio}</p>
+          {
+            d.creator.links.length > 0 && (
+              <p class="creator-links">
+                {d.creator.links.map((l) => (
+                  <a href={l.url} rel="noopener">
+                    {l.label}
+                  </a>
+                ))}
+              </p>
+            )
+          }
+        </div>
+      </div>
+
+      <div class="cta pad">
+        <a class="cta-primary" href="/join">我要接第 {openSlot} 棒</a>
+        <a class="cta-ghost" href={`/ep/${d.episode}.md`}>取用純文字版</a>
+      </div>
+    </section>
+
+    <nav class="pager pad" aria-label="集數導覽">
+      {prev ? <a href={`/ep/${prev.data.episode}`}>← 第 {prev.data.episode} 集</a> : <a href="/">← 回首頁</a>}
+      {
+        next ? (
+          <a class="pager-next" href={`/ep/${next.data.episode}`}>
+            第 {next.data.episode} 集 →
+          </a>
+        ) : (
+          <a class="pager-next" href="/join">
+            接下這一棒 →
+          </a>
+        )
+      }
+    </nav>
+
+    <p class="credit pad">
+      主視覺：{d.posterCredit}<br />
+      本集劇本與提示詞採 {LICENSE.content.name}，{LICENSE.content.summary}。{LICENSE.video}。
+    </p>
+  </div>
+
 </BaseLayout>
 
 <style>
@@ -812,6 +824,38 @@ const levelClass: Record<string, string> = {
     font-size: var(--fs-xs);
     line-height: 1.85;
     color: var(--text-faint);
+  }
+
+  /* ── 桌機 ──────────────────────────────────────────
+     斷點跟首頁一致（1024）。1024 以下維持直式單欄：
+     直式影片旁邊沒有足夠的寬度放第二欄，硬切只會兩邊都太窄。 */
+  @media (min-width: 1024px) {
+    /* 影片與著錄欄併排。46 / 54 的分法是配合直式 9:16 的影片：
+       影片本身只佔它那一欄的中間，左欄看起來會比 46% 窄。 */
+    .file-top {
+      display: grid;
+      grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+      align-items: center;
+      margin-top: var(--sp-6);
+    }
+
+    .file-meta > :first-child {
+      margin-top: 0;
+    }
+
+    /* 一鏡一列：左邊劇本、右邊提示詞。
+       這是這一頁最重要的閱讀動線：對照著看，而不是捲上捲下比對。 */
+    .shot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    /* 純段落要限寬。上面那些是資料與程式碼，可以寬；散文不行 */
+    .anchor-note p,
+    .title-block .hook {
+      max-width: var(--measure);
+    }
   }
 </style>
 
