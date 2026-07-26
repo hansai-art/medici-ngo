@@ -13,9 +13,9 @@ name = "medici-ngo"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-07-01"
 
-# D1 綁定。database_id 要換成 `npx wrangler d1 create medici-ngo` 產生的那一組，
-# 建好之後填進來並 commit（D1 的 id 不是密鑰，可以進版控）。
+# D1 綁定。database_id 不是密鑰，可以進版控。
+# 這一組是 2026-07-26 用 `wrangler d1 create medici-ngo` 建的（region APAC）。
 [[d1_databases]]
 binding = "DB"
 database_name = "medici-ngo"
-database_id = "TODO-執行 wrangler d1 create 之後填入"
+database_id = "94adc5e8-8be7-4cc5-9817-9c6c07e98caa"
