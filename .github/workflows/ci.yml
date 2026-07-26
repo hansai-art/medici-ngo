@@ -21,6 +21,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # 手動重跑。線上回讀那關打的是真實網域，DNS 或憑證還沒生效時會紅，
+  # 這種紅燈不該逼人推一個空 commit 才能重驗。
+  workflow_dispatch:
 
 # 同一個 PR 連續推的話，只跑最後一次
 concurrency:
